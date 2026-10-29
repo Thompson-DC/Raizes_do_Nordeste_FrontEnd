@@ -1,0 +1,80 @@
+/**
+ * Raízes do Nordeste - Frente de Caixa Multicanal
+ * Estilos complementares: Warm Tactile Neo-Brutalism & Modo Wireframe
+ * Conforme especificado em docs/FSD.md e docs/DESIGN.md
+ */
+
+/* ==========================================================================
+   1. EFEITO COSTURA ARTESANAL (.stitch) - Tradição do Couro Vaqueiro
+   ========================================================================== */
+.stitch {
+  border: 2px dashed #4A1304;
+  border-radius: 20px;
+}
+
+/* ==========================================================================
+   2. ELEVAÇÃO TÁTIL NEO-BRUTALISTA (3D Stamped Drops & Pressed States)
+   ========================================================================== */
+.shadow-tactile-sm {
+  box-shadow: 0 2px 0 #3A0E03;
+}
+
+.shadow-tactile-md {
+  box-shadow: 0 4px 0 #3A0E03;
+}
+
+.shadow-tactile-lg {
+  box-shadow: 0 6px 0 #3A0E03;
+}
+
+.pressable:active {
+  transform: translate(0, 3px);
+  box-shadow: 0 1px 0 #3A0E03;
+}
+
+/* ==========================================================================
+   3. MODO WIREFRAME ESTRUTURAL (Auditoria Técnica & Acadêmica)
+   ========================================================================== */
+body.wireframe-mode {
+  background-color: #f5f5f5 !important;
+  color: #1a1a1a !important;
+}
+
+body.wireframe-mode header,
+body.wireframe-mode main,
+body.wireframe-mode section,
+body.wireframe-mode article,
+body.wireframe-mode aside,
+body.wireframe-mode footer,
+body.wireframe-mode div,
+body.wireframe-mode button,
+body.wireframe-mode input {
+  box-shadow: none !important;
+}
+
+body.wireframe-mode .stitch,
+body.wireframe-mode [class*="border"] {
+  border-style: dashed !important;
+  border-color: #333333 !important;
+}
+
+body.wireframe-mode img {
+  filter: grayscale(100%) contrast(150%) opacity(40%);
+  background-color: #e0e0e0;
+}
+
+/* ==========================================================================
+   4. AJUSTES DE SCROLL E ACESSIBILIDADE
+   ========================================================================== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ocultar barra de rolagem mantendo a funcionalidade de scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,56 @@
+# ========================================================
+# Raízes do Nordeste - Frente de Caixa Multicanal
+# Configuração de Ambiente e Ignorados (SPA Zero-Build)
+# ========================================================
+
+# Ambientes de Desenvolvimento e IDEs
+.vscode/
+.idea/
+
+# Arquivos de Sistema Operacional
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Segurança e Variáveis de Ambiente
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+id_rsa*
+secrets.*
+
+# Logs e Arquivos Temporários
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tmp
+*.temp
+*.swp
+*.bak
+*~
+
+# Dumps e Backups de Dados
+*.sql
+*.sqlite
+*.db
+*.dump
