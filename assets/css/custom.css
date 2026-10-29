@@ -75,16 +75,34 @@
   grid-template-columns: 1fr !important;
 }
 
-/* Canal Web Desktop: As 3 filiais ficam sempre lado a lado em 3 colunas */
-.channel-web .grid-branches {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 0.875rem;
+/* Canal Web Desktop: As 3 filiais ocupam todo o espaço com distribuição centralizada */
+.channel-web #catalog-section {
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
-@media (max-width: 700px) {
+.channel-web .grid-branches {
+  display: grid !important;
+  width: 100% !important;
+  max-width: 1100px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 1.5rem !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+}
+
+@media (max-width: 768px) {
   .channel-web .grid-branches {
     grid-template-columns: 1fr !important;
   }
+}
+
+/* Oculta a coluna lateral da sacola enquanto ela estiver vazia, liberando 100% do espaço ao catálogo */
+#cart-aside:has(#cart-container:empty),
+#cart-aside:empty {
+  display: none !important;
 }
 
 /* Garantia de área de toque mínima de 48px para conformidade WCAG AA no Totem */
