@@ -33,11 +33,41 @@
 }
 
 /* ==========================================================================
-   3. MODO WIREFRAME ESTRUTURAL (Auditoria Técnica & Acadêmica)
+   3. ADAPTAÇÃO DO CANAL TOTEM DE AUTOATENDIMENTO (Touch-First & Proporção)
+   ========================================================================== */
+.channel-totem {
+  max-width: 520px !important;
+  min-height: 88vh;
+  box-shadow: 0 8px 0 #3A0E03 !important;
+}
+
+/* Garantia de área de toque mínima de 48px para conformidade WCAG AA */
+.channel-totem button,
+.channel-totem input,
+.channel-totem select,
+.channel-totem a.btn,
+.channel-totem [role="button"],
+.channel-totem .touch-target {
+  min-height: 48px;
+}
+
+/* ==========================================================================
+   4. MODO WIREFRAME ESTRUTURAL (Auditoria Técnica & Acadêmica)
    ========================================================================== */
 body.wireframe-mode {
-  background-color: #f5f5f5 !important;
-  color: #1a1a1a !important;
+  background-color: #e5e5e5 !important;
+  color: #111111 !important;
+}
+
+body.wireframe-mode #global-control-bar {
+  background-color: #2b2b2b !important;
+  border-color: #111111 !important;
+}
+
+body.wireframe-mode #app-container {
+  background-color: #ffffff !important;
+  border-color: #222222 !important;
+  box-shadow: none !important;
 }
 
 body.wireframe-mode header,
@@ -52,19 +82,30 @@ body.wireframe-mode input {
   box-shadow: none !important;
 }
 
+body.wireframe-mode [class*="bg-surface"],
+body.wireframe-mode [class*="bg-"] {
+  background-color: #f0f0f0 !important;
+  color: #111111 !important;
+}
+
+body.wireframe-mode #global-control-bar,
+body.wireframe-mode #global-control-bar * {
+  background-color: initial !important;
+}
+
 body.wireframe-mode .stitch,
 body.wireframe-mode [class*="border"] {
   border-style: dashed !important;
-  border-color: #333333 !important;
+  border-color: #444444 !important;
 }
 
 body.wireframe-mode img {
-  filter: grayscale(100%) contrast(150%) opacity(40%);
-  background-color: #e0e0e0;
+  filter: grayscale(100%) contrast(140%) opacity(40%);
+  background-color: #d1d5db;
 }
 
 /* ==========================================================================
-   4. AJUSTES DE SCROLL E ACESSIBILIDADE
+   5. AJUSTES DE SCROLL E ACESSIBILIDADE
    ========================================================================== */
 html {
   scroll-behavior: smooth;
