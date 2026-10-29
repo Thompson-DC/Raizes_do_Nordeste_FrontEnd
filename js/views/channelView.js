@@ -25,14 +25,14 @@ export class ChannelView {
 
     if (!this.container) return;
 
-    // Remove classes específicas de largura de todos os canais
-    this.container.classList.remove('max-w-sm', 'max-w-7xl', 'channel-totem');
+    // Remove classes específicas de largura e canais anteriores
+    this.container.classList.remove('max-w-sm', 'max-w-7xl', 'channel-totem', 'channel-app', 'channel-web');
 
     // Aplica as classes específicas conforme o canal
     switch (channel) {
       case 'app':
         // Canal App Mobile: container restrito (~390px a 420px), centralizado
-        this.container.classList.add('max-w-sm');
+        this.container.classList.add('max-w-sm', 'channel-app');
         break;
 
       case 'totem':
@@ -43,7 +43,7 @@ export class ChannelView {
       case 'web':
       default:
         // Canal Web Desktop: layout expandido em duas colunas com sacola lateral
-        this.container.classList.add('max-w-7xl');
+        this.container.classList.add('max-w-7xl', 'channel-web');
         break;
     }
 
