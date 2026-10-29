@@ -9,6 +9,7 @@ import { MOCK_DATA } from './models/mockData.js';
 import { storageService } from './models/storage.js';
 import { channelController } from './controllers/channelController.js';
 import { wireframeController } from './controllers/wireframeController.js';
+import { branchController } from './controllers/branchController.js';
 
 class App {
   constructor() {
@@ -17,6 +18,7 @@ class App {
     this.storage = storageService;
     this.channelController = channelController;
     this.wireframeController = wireframeController;
+    this.branchController = branchController;
     this.initialized = false;
   }
 
@@ -35,13 +37,17 @@ class App {
     this.wireframeController.init();
     console.info(`[${this.config.app_nome}] Simulador Multicanal e Modo Wireframe inicializados.`);
 
-    // 3. Atualização e renderização dos ícones Lucide
+    // 3. Inicialização do controlador de filiais (Fase 4)
+    this.branchController.init();
+    console.info(`[${this.config.app_nome}] Localização e Seleção de Filiais inicializadas.`);
+
+    // 4. Atualização e renderização dos ícones Lucide
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
 
     this.initialized = true;
-    console.info(`[${this.config.app_nome}] Fase 3 pronta: Simulador Multicanal e Auditoria Wireframe ativos.`);
+    console.info(`[${this.config.app_nome}] Fase 4 pronta: Localização e Seleção de Filiais ativas.`);
   }
 }
 
@@ -56,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.__RN_MOCK__ = MOCK_DATA;
   window.__RN_CHANNEL__ = channelController;
   window.__RN_WIREFRAME__ = wireframeController;
+  window.__RN_BRANCH__ = branchController;
 });
 
 export default App;
