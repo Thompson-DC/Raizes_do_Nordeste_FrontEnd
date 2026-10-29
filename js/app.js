@@ -11,6 +11,7 @@ import { channelController } from './controllers/channelController.js';
 import { wireframeController } from './controllers/wireframeController.js';
 import { branchController } from './controllers/branchController.js';
 import { menuController } from './controllers/menuController.js';
+import { cartController } from './controllers/cartController.js';
 
 class App {
   constructor() {
@@ -21,6 +22,7 @@ class App {
     this.wireframeController = wireframeController;
     this.branchController = branchController;
     this.menuController = menuController;
+    this.cartController = cartController;
     this.initialized = false;
   }
 
@@ -47,13 +49,17 @@ class App {
     this.menuController.init();
     console.info(`[${this.config.app_nome}] Catálogo de Cardápio e Validação de Estoque inicializados.`);
 
-    // 5. Atualização e renderização dos ícones Lucide
+    // 5. Inicialização do controlador da sacola de compras e resumo financeiro (Fase 6)
+    this.cartController.init();
+    console.info(`[${this.config.app_nome}] Sacola de Compras e Resumo Financeiro inicializados.`);
+
+    // 6. Atualização e renderização dos ícones Lucide
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
 
     this.initialized = true;
-    console.info(`[${this.config.app_nome}] Fase 5 pronta: Catálogo de Cardápio e Validação de Estoque ativos.`);
+    console.info(`[${this.config.app_nome}] Fase 6 pronta: Sacola de Compras e Resumo Financeiro ativos.`);
   }
 }
 
@@ -70,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.__RN_WIREFRAME__ = wireframeController;
   window.__RN_BRANCH__ = branchController;
   window.__RN_MENU__ = menuController;
+  window.__RN_CART__ = cartController;
 });
 
 export default App;

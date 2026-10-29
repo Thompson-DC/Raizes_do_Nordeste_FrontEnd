@@ -305,12 +305,12 @@ export const menuView = {
       >
         <div>
           <!-- Moldura da Imagem com Proteção e Fallback SVG -->
-          <div class="relative w-full h-40 sm:h-44 rounded-2xl border-[2px] border-[#4A1304] overflow-hidden bg-surface-container mb-3.5">
+          <div class="relative w-full h-44 sm:h-48 rounded-2xl border-[2px] border-[#4A1304] overflow-hidden bg-surface-container mb-3.5 flex items-center justify-center">
             <img
               src="${dish.imagem}"
               alt="${dish.nome}"
               data-dish-img="${dish.id}"
-              class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              class="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-105"
               loading="lazy"
               onerror="this.onerror=null; this.src='${this.getSvgFallback(dish.categoria, dish.nome)}';"
             />
