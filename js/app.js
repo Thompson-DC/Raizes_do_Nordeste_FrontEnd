@@ -10,6 +10,7 @@ import { storageService } from './models/storage.js';
 import { channelController } from './controllers/channelController.js';
 import { wireframeController } from './controllers/wireframeController.js';
 import { branchController } from './controllers/branchController.js';
+import { menuController } from './controllers/menuController.js';
 
 class App {
   constructor() {
@@ -19,6 +20,7 @@ class App {
     this.channelController = channelController;
     this.wireframeController = wireframeController;
     this.branchController = branchController;
+    this.menuController = menuController;
     this.initialized = false;
   }
 
@@ -41,13 +43,17 @@ class App {
     this.branchController.init();
     console.info(`[${this.config.app_nome}] Localização e Seleção de Filiais inicializadas.`);
 
-    // 4. Atualização e renderização dos ícones Lucide
+    // 4. Inicialização do controlador de cardápio e validação de estoque (Fase 5)
+    this.menuController.init();
+    console.info(`[${this.config.app_nome}] Catálogo de Cardápio e Validação de Estoque inicializados.`);
+
+    // 5. Atualização e renderização dos ícones Lucide
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
 
     this.initialized = true;
-    console.info(`[${this.config.app_nome}] Fase 4 pronta: Localização e Seleção de Filiais ativas.`);
+    console.info(`[${this.config.app_nome}] Fase 5 pronta: Catálogo de Cardápio e Validação de Estoque ativos.`);
   }
 }
 
@@ -63,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.__RN_CHANNEL__ = channelController;
   window.__RN_WIREFRAME__ = wireframeController;
   window.__RN_BRANCH__ = branchController;
+  window.__RN_MENU__ = menuController;
 });
 
 export default App;
