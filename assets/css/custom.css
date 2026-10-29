@@ -56,6 +56,10 @@
   grid-template-columns: 1fr !important;
 }
 
+.channel-app .grid-menu {
+  grid-template-columns: 1fr !important;
+}
+
 /* Canal Totem de Autoatendimento: Proporção Vertical 9:16 e Touch-First */
 .channel-totem {
   max-width: 520px !important;
@@ -72,6 +76,10 @@
 }
 
 .channel-totem .grid-branches {
+  grid-template-columns: 1fr !important;
+}
+
+.channel-totem .grid-menu {
   grid-template-columns: 1fr !important;
 }
 
@@ -176,10 +184,12 @@ html {
 }
 
 /* Ocultar barra de rolagem mantendo a funcionalidade de scroll */
-.no-scrollbar::-webkit-scrollbar {
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
   display: none;
 }
-.no-scrollbar {
+.no-scrollbar,
+.scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
