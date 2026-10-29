@@ -156,14 +156,22 @@
             <p class="font-editorial-accent italic text-xs text-secondary">Sabores autênticos do sertão à sua mesa</p>
           </div>
         </div>
-        <div id="active-branch-badge" class="hidden sm:flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border-[2px] border-[#4A1304]">
-          <i data-lucide="store" class="w-4 h-4 text-primary"></i>
-          <span class="text-xs font-bold text-on-surface">Selecione uma filial</span>
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div id="active-branch-badge" class="hidden sm:flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border-[2px] border-[#4A1304]">
+            <i data-lucide="store" class="w-4 h-4 text-primary"></i>
+            <span class="text-xs font-bold text-on-surface">Selecione uma filial</span>
+          </div>
+
+          <button id="cart-header-btn" type="button" class="flex items-center gap-2 bg-primary-container px-3.5 py-1.5 rounded-full border-[2px] border-[#4A1304] shadow-tactile-sm pressable font-bold text-xs text-[#4A1304] transition-all hover:bg-[#EEB382]" title="Ver Sacola de Compras" aria-label="Abrir sacola de compras">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            <span id="cart-header-count" class="bg-[#4A1304] text-white text-[11px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center">0</span>
+            <span id="cart-header-total" class="hidden sm:inline font-black text-[#4A1304]">R$ 0,00</span>
+          </button>
         </div>
       </section>
 
       <!-- Área de Conteúdo Principal (Alocação Dinâmica pelas Views) -->
-      <main id="main-content" class="flex-1 flex flex-col lg:flex-row gap-4 p-4 lg:p-6 overflow-y-auto">
+      <main id="main-content" class="flex-1 flex flex-col lg:flex-row gap-6 p-4 lg:p-6 overflow-y-auto">
         <!-- Coluna do Catálogo (Filiais, Categorias e Cardápio) -->
         <section id="catalog-section" class="flex-1 flex flex-col gap-6">
           <div id="branches-container" class="w-full">
@@ -177,13 +185,16 @@
           </div>
         </section>
 
-        <!-- Coluna da Sacola de Compras / Lateral Fixa no Desktop (Ativada pela Fase 6) -->
-        <aside id="cart-aside" class="hidden w-full lg:w-96 flex-col gap-4">
-          <div id="cart-container" class="w-full">
+        <!-- Coluna da Sacola de Compras / Lateral Fixa no Desktop -->
+        <aside id="cart-aside" class="flex w-full lg:w-96 flex-col gap-4">
+          <div id="cart-container" class="w-full sticky top-4">
             <!-- Renderizado dinamicamente por cartView.js -->
           </div>
         </aside>
       </main>
+
+      <!-- Barra Flutuante de Sacola para Canais Móveis (App & Totem) -->
+      <div id="mobile-cart-bar" class="hidden sticky bottom-0 z-30 w-full bg-gradient-to-t from-surface via-surface/90 to-transparent pt-2 pb-2"></div>
 
       <!-- Rodapé Institucional -->
       <footer id="app-footer" class="w-full border-t-[2.5px] border-[#4A1304] bg-surface-container p-4 text-center text-xs text-on-surface-variant">

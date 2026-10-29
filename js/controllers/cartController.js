@@ -1,0 +1,390 @@
+/**
+ * Raízes do Nordeste - Frente de Caixa Multicanal
+ * Controller: Sacola de Compras e Resumo Financeiro (js/controllers/cartController.js)
+ * Conforme especificado em docs/FSD.md e docs/DESIGN.md
+ */
+
+import { MOCK_DATA } from '../models/mockData.js';
+import { storageService } from '../models/storage.js';
+import { cartView } from '../views/cartView.js';
+
+class CartController {
+  constructor() {
+    this.cart = null;
+    this.container = null;
+    this.mobileBarContainer = null;
+    this.activeBranch = null;
+    this.currentChannel = 'web';
+    this.initialized = false;
+  }
+
+  /**
+   * Inicializa o controlador da sacola de compras e vincula ouvintes de eventos
+   * @param {string} [containerId='cart-container'] 
+   * @param {string} [mobileBarId='mobile-cart-bar'] 
+   */
+  init(containerId = 'cart-container', mobileBarId = 'mobile-cart-bar') {
+    this.container = document.getElementById(containerId);
+    this.mobileBarContainer = document.getElementById(mobileBarId);
+
+    // Carrega ou inicializa o carrinho a partir do storage
+    this.cart = this._loadCart();
+
+    // Identifica a filial ativa correspondente
+    this._updateActiveBranch(this.cart.filial_id);
+
+    // Registra ouvinte para itens adicionados a partir do cardápio (Fase 5)
+    window.addEventListener('rn:item-added', (event) => {
+      if (event && event.detail) {
+        if (event.detail.cart) {
+          // O item já foi gravado pelo menuController; sincroniza estado local e renderiza
+          this.cart = this._loadCart();
+          this._persistAndNotify();
+          this.render();
+        } else if (event.detail.dish) {
+          this.addItem(event.detail.dish);
+        }
+      }
+    });
+
+    // Registra ouvinte para alteração de filial (Fase 4)
+    window.addEventListener('rn:branch-changed', (event) => {
+      if (event && event.detail && event.detail.branchId) {
+        this.handleBranchChange(event.detail.branchId);
+      }
+    });
+
+    // Registra ouvinte para alternância de canais (Fase 3)
+    window.addEventListener('rn:channel-changed', (event) => {
+      if (event && event.detail && event.detail.channel) {
+        this.currentChannel = event.detail.channel;
+        this.render();
+      }
+    });
+
+    // Vincula clique do botão do cabeçalho para navegar ou abrir a sacola
+    const headerCartBtn = document.getElementById('cart-header-btn');
+    if (headerCartBtn) {
+      headerCartBtn.addEventListener('click', () => this.scrollToCart());
+    }
+
+    this.render();
+    this.initialized = true;
+
+    console.info(`[Raízes do Nordeste] CartController inicializado. Filial do carrinho: ${this.cart.filial_id}, Total de itens: ${this.getItemCount()}`);
+  }
+
+  /**
+   * Carrega o carrinho da persistência resiliente ou cria estrutura padrão
+   * @private
+   * @returns {Object}
+   */
+  _loadCart() {
+    const rawCart = storageService.getCart();
+    const fallbackBranchId = (MOCK_DATA.filiais && MOCK_DATA.filiais[0]) ? MOCK_DATA.filiais[0].id : 'recife-antigo';
+
+    const cleanCart = {
+      filial_id: (rawCart && rawCart.filial_id) ? rawCart.filial_id : fallbackBranchId,
+      itens: (rawCart && Array.isArray(rawCart.itens)) ? rawCart.itens : [],
+      subtotal: Number(rawCart && rawCart.subtotal) || 0,
+      pontos_usados: Number(rawCart && rawCart.pontos_usados) || 0,
+      valor_desconto: Number(rawCart && rawCart.valor_desconto) || 0,
+      total: Number(rawCart && rawCart.total) || 0,
+      consentimento_lgpd: Boolean(rawCart && rawCart.consentimento_lgpd)
+    };
+
+    return this._recalculateTotals(cleanCart);
+  }
+
+  /**
+   * Atualiza a referência da filial ativa em memória
+   * @private
+   * @param {string} branchId 
+   */
+  _updateActiveBranch(branchId) {
+    if (!branchId || !MOCK_DATA.filiais) return;
+    this.activeBranch = MOCK_DATA.filiais.find(b => b.id === branchId) || MOCK_DATA.filiais[0];
+  }
+
+  /**
+   * Recalcula subtotais e totais garantindo integridade matemática
+   * @private
+   * @param {Object} cart 
+   * @returns {Object}
+   */
+  _recalculateTotals(cart) {
+    if (!Array.isArray(cart.itens)) {
+      cart.itens = [];
+    }
+
+    // Recalcula o subtotal de cada item
+    let subtotal = 0;
+    cart.itens.forEach(item => {
+      const qty = Math.max(1, Math.min(99, parseInt(item.quantidade, 10) || 1));
+      const unit = Number(item.preco_unitario) || 0;
+      item.quantidade = qty;
+      item.subtotal = Number((qty * unit).toFixed(2));
+      subtotal += item.subtotal;
+    });
+
+    cart.subtotal = Number(subtotal.toFixed(2));
+    const discount = Number(cart.valor_desconto) || 0;
+
+    // Total travado no piso de R$ 0,00 conforme regra de negócio
+    cart.total = Number(Math.max(0, cart.subtotal - discount).toFixed(2));
+
+    return cart;
+  }
+
+  /**
+   * Salva o estado do carrinho no storage e emite evento reativo global
+   * @private
+   */
+  _persistAndNotify() {
+    this._recalculateTotals(this.cart);
+    storageService.saveCart(this.cart);
+
+    // Emite evento reativo para que outros controladores reajam
+    const event = new CustomEvent('rn:cart-updated', {
+      detail: {
+        cart: this.cart,
+        totalItems: this.getItemCount(),
+        total: this.cart.total
+      }
+    });
+    window.dispatchEvent(event);
+  }
+
+  /**
+   * Trata alteração de filial disparada externamente
+   * @param {string} branchId 
+   */
+  handleBranchChange(branchId) {
+    if (this.cart.filial_id === branchId) return;
+
+    this.cart.filial_id = branchId;
+    this._updateActiveBranch(branchId);
+    this._persistAndNotify();
+    this.render();
+
+    console.info(`[CartController] Filial do carrinho atualizada para: ${branchId}`);
+  }
+
+  /**
+   * Retorna a quantidade total de itens (soma das quantidades)
+   * @returns {number}
+   */
+  getItemCount() {
+    if (!this.cart || !Array.isArray(this.cart.itens)) return 0;
+    return this.cart.itens.reduce((sum, item) => sum + (parseInt(item.quantidade, 10) || 0), 0);
+  }
+
+  /**
+   * Retorna o carrinho atual
+   * @returns {Object}
+   */
+  getCart() {
+    return { ...this.cart };
+  }
+
+  /**
+   * Adiciona um prato à sacola ou incrementa sua quantidade
+   * @param {Object} dish 
+   */
+  addItem(dish) {
+    if (!dish || !dish.id) return;
+
+    const existingIndex = this.cart.itens.findIndex(item => item.produto_id === dish.id);
+
+    if (existingIndex >= 0) {
+      const currentQty = this.cart.itens[existingIndex].quantidade;
+      if (currentQty < 99) {
+        this.cart.itens[existingIndex].quantidade = currentQty + 1;
+      }
+    } else {
+      this.cart.itens.push({
+        produto_id: dish.id,
+        nome: dish.nome,
+        preco_unitario: Number(dish.preco) || 0,
+        quantidade: 1,
+        subtotal: Number(dish.preco) || 0
+      });
+    }
+
+    this._persistAndNotify();
+    this.render();
+
+    console.info(`[CartController] Item adicionado: ${dish.nome}. Total itens: ${this.getItemCount()}`);
+  }
+
+  /**
+   * Incrementa a quantidade de um item na sacola
+   * @param {string} productId 
+   */
+  increaseQuantity(productId) {
+    const item = this.cart.itens.find(i => i.produto_id === productId);
+    if (!item) return;
+
+    if (item.quantidade < 99) {
+      item.quantidade += 1;
+      this._persistAndNotify();
+      this.render();
+    }
+  }
+
+  /**
+   * Decrementa a quantidade de um item na sacola (remove se for a 0)
+   * @param {string} productId 
+   */
+  decreaseQuantity(productId) {
+    const index = this.cart.itens.findIndex(i => i.produto_id === productId);
+    if (index < 0) return;
+
+    if (this.cart.itens[index].quantidade > 1) {
+      this.cart.itens[index].quantidade -= 1;
+    } else {
+      // Remove o item se a quantidade atingir 0
+      this.cart.itens.splice(index, 1);
+    }
+
+    this._persistAndNotify();
+    this.render();
+  }
+
+  /**
+   * Remove imediatamente um item da sacola
+   * @param {string} productId 
+   */
+  removeItem(productId) {
+    const index = this.cart.itens.findIndex(i => i.produto_id === productId);
+    if (index < 0) return;
+
+    const removedItem = this.cart.itens[index];
+    this.cart.itens.splice(index, 1);
+
+    this._persistAndNotify();
+    this.render();
+
+    console.info(`[CartController] Item removido da sacola: ${removedItem.nome}`);
+  }
+
+  /**
+   * Esvazia completamente a sacola de compras
+   */
+  clearCart() {
+    this.cart.itens = [];
+    this.cart.subtotal = 0;
+    this.cart.valor_desconto = 0;
+    this.cart.pontos_usados = 0;
+    this.cart.total = 0;
+
+    this._persistAndNotify();
+    this.render();
+
+    console.info('[CartController] Sacola de compras esvaziada com sucesso.');
+  }
+
+  /**
+   * Ação de avançar para checkout / identificação
+   */
+  proceedToCheckout() {
+    if (this.getItemCount() <= 0) {
+      console.warn('[CartController] Tentativa de avançar com sacola vazia.');
+      return;
+    }
+
+    console.info('[CartController] Prosseguindo para a etapa de identificação e checkout...');
+
+    // Dispara evento para orquestração das fases subsequentes (Fase 8 e 9)
+    const event = new CustomEvent('rn:cart-checkout', {
+      detail: {
+        cart: this.cart
+      }
+    });
+    window.dispatchEvent(event);
+
+    // Feedback visual amigável temporário enquanto as próximas fases não estão ativas
+    alert(`Pedido pronto com ${this.getItemCount()} itens (${cartView.formatCurrency(this.cart.total)}) na filial ${this.activeBranch ? this.activeBranch.nome : 'selecionada'}.\n\nPróxima etapa: Identificação e Pagamento.`);
+  }
+
+  /**
+   * Rola suavemente até o container da sacola (útil para canais móveis)
+   */
+  scrollToCart() {
+    if (!this.container) return;
+
+    this.container.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+    // Efeito visual sutil de destaque no card da sacola
+    const card = document.getElementById('cart-card');
+    if (card) {
+      card.classList.add('ring-4', 'ring-primary-container');
+      setTimeout(() => {
+        card.classList.remove('ring-4', 'ring-primary-container');
+      }, 1200);
+    }
+  }
+
+  /**
+   * Renderiza a sacola e todos os seus indicadores
+   */
+  render() {
+    if (!this.container) {
+      this.container = document.getElementById('cart-container');
+    }
+    if (!this.mobileBarContainer) {
+      this.mobileBarContainer = document.getElementById('mobile-cart-bar');
+    }
+
+    if (!this.container) return;
+
+    const totalItems = this.getItemCount();
+    const totalValue = this.cart ? this.cart.total : 0;
+
+    // 1. Renderiza o card principal da sacola
+    cartView.renderCart(
+      this.container,
+      this.cart,
+      this.activeBranch,
+      {
+        onIncrease: (id) => this.increaseQuantity(id),
+        onDecrease: (id) => this.decreaseQuantity(id),
+        onRemove: (id) => this.removeItem(id),
+        onClear: () => this.clearCart(),
+        onCheckout: () => this.proceedToCheckout()
+      }
+    );
+
+    // 2. Atualiza badge do cabeçalho
+    cartView.updateHeaderBadge(totalItems, totalValue);
+
+    // 3. Renderiza barra móvel flutuante se estiver em canais móveis (App ou Totem)
+    if (this.mobileBarContainer) {
+      const isMobileChannel = (this.currentChannel === 'app' || this.currentChannel === 'totem');
+      if (isMobileChannel && totalItems > 0) {
+        cartView.renderMobileCartBar(
+          this.mobileBarContainer,
+          totalItems,
+          totalValue,
+          () => this.scrollToCart()
+        );
+      } else {
+        this.mobileBarContainer.innerHTML = '';
+        this.mobileBarContainer.classList.add('hidden');
+      }
+    }
+
+    // 4. Garante que o aside esteja visível no desktop
+    const aside = document.getElementById('cart-aside');
+    if (aside) {
+      aside.classList.remove('hidden');
+      aside.classList.add('flex');
+    }
+  }
+}
+
+export const cartController = new CartController();
+export default cartController;

@@ -83,34 +83,45 @@
   grid-template-columns: 1fr !important;
 }
 
-/* Canal Web Desktop: As 3 filiais ocupam todo o espaço com distribuição centralizada */
+/* Canal Web Desktop: Distribuição harmônica entre catálogo e sacola lateral fixa */
+.channel-web #main-content {
+  flex-direction: row !important;
+  align-items: flex-start !important;
+}
+
 .channel-web #catalog-section {
-  width: 100% !important;
-  max-width: 100% !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+.channel-web #cart-aside {
+  width: 23rem !important;
+  max-width: 24rem !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
 }
 
 .channel-web .grid-branches {
   display: grid !important;
   width: 100% !important;
-  max-width: 1100px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 1.5rem !important;
+  gap: 1.25rem !important;
   justify-content: center !important;
   align-items: stretch !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+  .channel-web #main-content {
+    flex-direction: column !important;
+  }
+  .channel-web #cart-aside {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
   .channel-web .grid-branches {
     grid-template-columns: 1fr !important;
   }
-}
-
-/* Oculta a coluna lateral da sacola enquanto ela estiver vazia, liberando 100% do espaço ao catálogo */
-#cart-aside:has(#cart-container:empty),
-#cart-aside:empty {
-  display: none !important;
 }
 
 /* Garantia de área de toque mínima de 48px para conformidade WCAG AA no Totem */
