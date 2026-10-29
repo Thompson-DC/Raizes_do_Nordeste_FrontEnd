@@ -20,28 +20,30 @@ export const branchView = {
 
     container.innerHTML = `
       <section aria-labelledby="branches-section-title" class="w-full">
-        <!-- Cabeçalho da Seção de Filiais -->
-        <div class="flex flex-wrap items-center justify-between gap-2.5 mb-4">
-          <div class="flex-1 min-w-[220px]">
-            <div class="flex items-center gap-2">
-              <i data-lucide="store" class="w-5 h-5 text-primary"></i>
-              <h2 id="branches-section-title" class="font-headline-sm text-lg sm:text-xl font-black text-[#4A1304] tracking-tight">
-                Selecione a Filial de Atendimento
-              </h2>
+        <div class="max-w-5xl mx-auto">
+          <!-- Cabeçalho da Seção de Filiais -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <div class="flex-1 min-w-[240px]">
+              <div class="flex items-center gap-2">
+                <i data-lucide="store" class="w-5 h-5 text-primary"></i>
+                <h2 id="branches-section-title" class="font-headline-sm text-lg sm:text-xl font-black text-[#4A1304] tracking-tight">
+                  Selecione a Filial de Atendimento
+                </h2>
+              </div>
+              <p class="font-body-sm text-xs sm:text-sm text-on-surface-variant mt-0.5">
+                O estoque dos pratos sertanejos e o tempo de preparo são calculados de acordo com a unidade escolhida.
+              </p>
             </div>
-            <p class="font-body-sm text-xs sm:text-sm text-on-surface-variant mt-0.5">
-              O estoque dos pratos sertanejos e o tempo de preparo são calculados de acordo com a unidade escolhida.
-            </p>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container-high rounded-full border border-[#4A1304]/30 text-xs font-bold text-secondary">
+              <span class="w-2 h-2 rounded-full bg-[#25D366] animate-pulse"></span>
+              3 Lojas em Operação
+            </span>
           </div>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container-high rounded-full border border-[#4A1304]/30 text-xs font-bold text-secondary">
-            <span class="w-2 h-2 rounded-full bg-[#25D366] animate-pulse"></span>
-            3 Lojas em Operação
-          </span>
-        </div>
 
-        <!-- Grid Responsivo Adaptativo de Filiais (Auto-fit Minmax) -->
-        <div class="grid-branches" role="radiogroup" aria-label="Filiais disponíveis para retirada">
-          ${branches.map(branch => this.renderBranchCard(branch, branch.id === activeBranchId)).join('')}
+          <!-- Grid Responsivo de Filiais com Distribuição Centralizada -->
+          <div class="grid-branches w-full" role="radiogroup" aria-label="Filiais disponíveis para retirada">
+            ${branches.map(branch => this.renderBranchCard(branch, branch.id === activeBranchId)).join('')}
+          </div>
         </div>
       </section>
     `;
@@ -121,12 +123,12 @@ export const branchView = {
         role="radio"
         aria-checked="${isSelected}"
         tabindex="0"
-        class="relative border-[2.5px] rounded-3xl p-3 sm:p-4 transition-all duration-200 cursor-pointer ${cardBgClass} flex flex-col justify-between"
+        class="relative border-[2.5px] rounded-3xl p-3.5 sm:p-4 transition-all duration-200 cursor-pointer ${cardBgClass} flex flex-col justify-between w-full h-full"
       >
         ${selectedBadge}
 
         <!-- Efeito Costura de Couro Interno (.stitch) -->
-        <div class="stitch p-3 flex flex-col justify-between flex-1 bg-surface-bright/40">
+        <div class="stitch p-3 sm:p-3.5 flex flex-col justify-between flex-1 bg-surface-bright/40 w-full">
           <div>
             <!-- Cabeçalho do Card da Filial -->
             <div class="flex items-start justify-between gap-1.5 mb-2">
