@@ -1,0 +1,36 @@
+# ========================================================
+# Raízes do Nordeste - Frente de Caixa Multicanal
+# Configuração de Atributos do Git (.gitattributes)
+# Padronização de quebras de linha e tratamento de arquivos
+# ========================================================
+
+# Normalização automática para arquivos de texto (LF)
+* text=auto eol=lf
+
+# Arquivos de Marcação e Estilo
+*.html text eol=lf
+*.css text eol=lf
+
+# Scripts e Código Front-End
+*.js text eol=lf
+*.json text eol=lf
+
+# Documentação e Contexto
+*.md text eol=lf
+*.txt text eol=lf
+
+# Arquivos de Imagem e Binários (não alterar quebras de linha)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+
+# Fontes e Ativos Binários
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary

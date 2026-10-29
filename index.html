@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raízes do Nordeste - Frente de Caixa Multicanal</title>
+  
+  <!-- Fontes Oficiais do Design System (DESIGN.md) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Nunito+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Ícones Lucide via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind CSS v3 via CDN Oficial -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#fff8f2",
+            "surface-dim": "#e6d8c5",
+            "surface-bright": "#fff8f2",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#fff2df",
+            "surface-container": "#faecd8",
+            "surface-container-high": "#f4e6d3",
+            "surface-container-highest": "#eee1cd",
+            "on-surface": "#211b0f",
+            "on-surface-variant": "#52443a",
+            "inverse-surface": "#372f22",
+            "inverse-on-surface": "#fdefdb",
+            "outline": "#847469",
+            "outline-variant": "#d7c3b6",
+            "surface-tint": "#885120",
+            "primary": "#885120",
+            "on-primary": "#ffffff",
+            "primary-container": "#e9a36a",
+            "on-primary-container": "#693807",
+            "inverse-primary": "#ffb77e",
+            "secondary": "#924c0e",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#fea360",
+            "on-secondary-container": "#753900",
+            "tertiary": "#7c5800",
+            "on-tertiary": "#ffffff",
+            "tertiary-container": "#dfa940",
+            "on-tertiary-container": "#5b3f00",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a",
+            "primary-fixed": "#ffdcc3",
+            "primary-fixed-dim": "#ffb77e",
+            "on-primary-fixed": "#2f1500",
+            "on-primary-fixed-variant": "#6c3a09",
+            "secondary-fixed": "#ffdcc6",
+            "secondary-fixed-dim": "#ffb784",
+            "on-secondary-fixed": "#301400",
+            "on-secondary-fixed-variant": "#713700",
+            "tertiary-fixed": "#ffdea8",
+            "tertiary-fixed-dim": "#f5bd52",
+            "on-tertiary-fixed": "#271900",
+            "on-tertiary-fixed-variant": "#5e4200",
+            "background": "#fff8f2",
+            "on-background": "#211b0f",
+            "surface-variant": "#eee1cd",
+            "status-ready": "#25D366"
+          },
+          fontFamily: {
+            "display-hero": ["Epilogue", "sans-serif"],
+            "headline-lg": ["Epilogue", "sans-serif"],
+            "headline-md": ["Epilogue", "sans-serif"],
+            "headline-sm": ["Epilogue", "sans-serif"],
+            "body-lg": ["Nunito Sans", "sans-serif"],
+            "body-md": ["Nunito Sans", "sans-serif"],
+            "body-sm": ["Nunito Sans", "sans-serif"],
+            "label-lg": ["Nunito Sans", "sans-serif"],
+            "label-md": ["Nunito Sans", "sans-serif"],
+            "label-sm": ["Nunito Sans", "sans-serif"],
+            "editorial-accent": ["Fraunces", "serif"]
+          },
+          spacing: {
+            "gutter": "1.25rem",
+            "gutter-mobile": "0.75rem",
+            "margin": "2rem",
+            "margin-mobile": "1rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2.5rem"
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Estilos Customizados (Wireframe e .stitch) -->
+  <link rel="stylesheet" href="./assets/css/custom.css">
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- Barra de Controle Global Superior (Auditoria & Multicanalidade) -->
+  <header id="global-control-bar" class="w-full bg-inverse-surface text-inverse-on-surface border-b-[2.5px] border-[#3A0E03] px-4 py-2 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Identificação Institucional -->
+      <div class="flex items-center gap-3">
+        <img src="./assets/img/logo_branca.png" alt="Raízes do Nordeste" class="h-8 w-auto object-contain">
+        <span class="font-headline-sm text-sm sm:text-base font-bold tracking-tight text-[#ffdea8]">Frente de Caixa Multicanal</span>
+      </div>
+
+      <!-- Controles de Auditoria Técnica e Canal -->
+      <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+        <!-- Seletor de Viewport / Canais -->
+        <nav aria-label="Seletor de Canal de Atendimento" class="flex items-center bg-[#211b0f] p-1 rounded-full border border-[#847469]/40 text-xs font-bold">
+          <button id="btn-channel-app" type="button" class="px-3 py-1 rounded-full text-inverse-on-surface hover:text-white transition-all flex items-center gap-1" data-channel="app" title="Simular App Mobile">
+            <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+            <span>App</span>
+          </button>
+          <button id="btn-channel-totem" type="button" class="px-3 py-1 rounded-full text-inverse-on-surface hover:text-white transition-all flex items-center gap-1" data-channel="totem" title="Simular Totem de Autoatendimento">
+            <i data-lucide="tablet" class="w-3.5 h-3.5"></i>
+            <span>Totem</span>
+          </button>
+          <button id="btn-channel-web" type="button" class="px-3 py-1 rounded-full bg-primary text-white shadow-sm flex items-center gap-1" data-channel="web" title="Simular Web Desktop">
+            <i data-lucide="monitor" class="w-3.5 h-3.5"></i>
+            <span>Web</span>
+          </button>
+        </nav>
+
+        <!-- Alternador de Modo Wireframe -->
+        <button id="btn-toggle-wireframe" type="button" class="px-3 py-1.5 rounded-full border border-[#847469]/50 text-xs font-bold text-inverse-on-surface hover:bg-[#211b0f] transition-all flex items-center gap-1" title="Ativar/Desativar Modo Wireframe Estrutural">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span>Modo Wireframe</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Raiz Multicanal da Aplicação (Viewports Alternáveis) -->
+  <div id="viewport-wrapper" class="flex-1 w-full flex justify-center items-start p-2 sm:p-4 bg-surface-dim/30">
+    <div id="app-container" class="w-full max-w-7xl bg-surface border-[2.5px] border-[#4A1304] rounded-3xl shadow-tactile-md overflow-hidden flex flex-col min-h-[85vh] transition-all duration-300">
+      
+      <!-- Cabeçalho da Aplicação de Autoatendimento -->
+      <section id="app-header-container" class="w-full border-b-[2.5px] border-[#4A1304] bg-surface-container-high p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img src="./assets/img/logo.png" alt="Raízes do Nordeste" class="h-10 w-auto object-contain">
+          <div>
+            <h1 class="font-headline-md text-xl sm:text-2xl font-black text-[#4A1304] leading-tight">Raízes do Nordeste</h1>
+            <p class="font-editorial-accent italic text-xs text-secondary">Sabores autênticos do sertão à sua mesa</p>
+          </div>
+        </div>
+        <div id="active-branch-badge" class="hidden sm:flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border-[2px] border-[#4A1304]">
+          <i data-lucide="store" class="w-4 h-4 text-primary"></i>
+          <span class="text-xs font-bold text-on-surface">Selecione uma filial</span>
+        </div>
+      </section>
+
+      <!-- Área de Conteúdo Principal (Alocação Dinâmica pelas Views) -->
+      <main id="main-content" class="flex-1 flex flex-col lg:flex-row gap-4 p-4 lg:p-6 overflow-y-auto">
+        <!-- Coluna do Catálogo (Filiais, Categorias e Cardápio) -->
+        <section id="catalog-section" class="flex-1 flex flex-col gap-6">
+          <div id="branches-container" class="w-full">
+            <!-- Renderizado dinamicamente por branchView.js -->
+          </div>
+          <div id="categories-container" class="w-full">
+            <!-- Renderizado dinamicamente por menuView.js -->
+          </div>
+          <div id="menu-grid-container" class="w-full">
+            <!-- Renderizado dinamicamente por menuView.js -->
+          </div>
+        </section>
+
+        <!-- Coluna da Sacola de Compras / Lateral Fixa no Desktop -->
+        <aside id="cart-aside" class="w-full lg:w-96 flex flex-col gap-4">
+          <div id="cart-container" class="w-full">
+            <!-- Renderizado dinamicamente por cartView.js -->
+          </div>
+        </aside>
+      </main>
+
+      <!-- Rodapé Institucional -->
+      <footer id="app-footer" class="w-full border-t-[2.5px] border-[#4A1304] bg-surface-container p-4 text-center text-xs text-on-surface-variant">
+        <p>© 2026 Raízes do Nordeste - Autoatendimento e Ponto de Venda. Todos os direitos reservados.</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Contêineres de Modais e Notificações Flutuantes -->
+  <div id="modal-container" class="relative z-50"></div>
+  <div id="lgpd-banner-container" class="fixed bottom-0 left-0 right-0 z-40"></div>
+
+  <!-- Inicialização dos Ícones Lucide -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+
+  <!-- Ponto de Entrada Modular da Aplicação -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

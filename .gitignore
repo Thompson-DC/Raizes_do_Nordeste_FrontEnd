@@ -1,0 +1,73 @@
+# ========================================================
+# Raízes do Nordeste - Frente de Caixa Multicanal
+# Arquivo .gitignore para SPA Vanilla Zero-Build
+# ========================================================
+
+# 1. Pastas e Arquivos de Ferramentas / Assistentes / IDEs
+.antigravity/
+.gemini/
+.cursor/
+.chat/
+.vscode/
+.idea/
+
+# 2. Arquivos de Controle Interno e Relatórios de Processo
+AGENTS.md
+CLAUDE.md
+docs/PLANO.md
+docs/STATUS.md
+docs/ERROS.md
+docs/INSUMOS.md
+docs/code.html
+docs/logo.png
+docs/logo_branca.png
+docs/*.png
+docs/*.html
+
+# 3. Arquivos de Sistema Operacional
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+
+# 4. Prevenção de Segredos e Credenciais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+id_rsa*
+secrets.*
+
+# 5. Logs e Arquivos Temporários
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tmp
+*.temp
+*.swp
+*.bak
+*~
+
+# 6. Dumps e Backups de Dados
+*.sql
+*.sqlite
+*.db
+*.dump
