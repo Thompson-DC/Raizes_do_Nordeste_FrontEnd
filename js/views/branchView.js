@@ -21,8 +21,8 @@ export const branchView = {
     container.innerHTML = `
       <section aria-labelledby="branches-section-title" class="w-full">
         <!-- Cabeçalho da Seção de Filiais -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-          <div>
+        <div class="flex flex-wrap items-center justify-between gap-2.5 mb-4">
+          <div class="flex-1 min-w-[220px]">
             <div class="flex items-center gap-2">
               <i data-lucide="store" class="w-5 h-5 text-primary"></i>
               <h2 id="branches-section-title" class="font-headline-sm text-lg sm:text-xl font-black text-[#4A1304] tracking-tight">
@@ -33,14 +33,14 @@ export const branchView = {
               O estoque dos pratos sertanejos e o tempo de preparo são calculados de acordo com a unidade escolhida.
             </p>
           </div>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container-high rounded-full border border-[#4A1304]/30 text-xs font-bold text-secondary self-start sm:self-auto">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container-high rounded-full border border-[#4A1304]/30 text-xs font-bold text-secondary">
             <span class="w-2 h-2 rounded-full bg-[#25D366] animate-pulse"></span>
             3 Lojas em Operação
           </span>
         </div>
 
-        <!-- Grid Responsivo de Filiais -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" role="radiogroup" aria-label="Filiais disponíveis para retirada">
+        <!-- Grid Responsivo Adaptativo de Filiais (Auto-fit Minmax) -->
+        <div class="grid-branches" role="radiogroup" aria-label="Filiais disponíveis para retirada">
           ${branches.map(branch => this.renderBranchCard(branch, branch.id === activeBranchId)).join('')}
         </div>
       </section>

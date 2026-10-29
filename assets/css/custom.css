@@ -33,15 +33,49 @@
 }
 
 /* ==========================================================================
-   3. ADAPTAÇÃO DO CANAL TOTEM DE AUTOATENDIMENTO (Touch-First & Proporção)
+   3. GRID INTELIGENTE ADAPTATIVO & CANAIS DE AUTOATENDIMENTO
    ========================================================================== */
+
+/* Grid flexível por largura mínima de card (Auto-fit Minmax) */
+.grid-branches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+/* Canal App Mobile (~390px a 420px): Força fluxo vertical em coluna única */
+.channel-app #main-content {
+  flex-direction: column !important;
+}
+
+.channel-app #cart-aside {
+  width: 100% !important;
+}
+
+.channel-app .grid-branches {
+  grid-template-columns: 1fr !important;
+}
+
+/* Canal Totem de Autoatendimento: Proporção Vertical 9:16 e Touch-First */
 .channel-totem {
   max-width: 520px !important;
   min-height: 88vh;
   box-shadow: 0 8px 0 #3A0E03 !important;
 }
 
-/* Garantia de área de toque mínima de 48px para conformidade WCAG AA */
+.channel-totem #main-content {
+  flex-direction: column !important;
+}
+
+.channel-totem #cart-aside {
+  width: 100% !important;
+}
+
+.channel-totem .grid-branches {
+  grid-template-columns: 1fr !important;
+}
+
+/* Garantia de área de toque mínima de 48px para conformidade WCAG AA no Totem */
 .channel-totem button,
 .channel-totem input,
 .channel-totem select,
