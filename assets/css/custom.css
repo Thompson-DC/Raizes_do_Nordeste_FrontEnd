@@ -75,6 +75,18 @@
   grid-template-columns: 1fr !important;
 }
 
+/* Canal Web Desktop: As 3 filiais ficam sempre lado a lado em 3 colunas */
+.channel-web .grid-branches {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.875rem;
+}
+
+@media (max-width: 700px) {
+  .channel-web .grid-branches {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Garantia de área de toque mínima de 48px para conformidade WCAG AA no Totem */
 .channel-totem button,
 .channel-totem input,
