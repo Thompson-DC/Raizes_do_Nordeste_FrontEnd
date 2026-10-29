@@ -5,10 +5,14 @@
  */
 
 import { CONFIG } from '../config/config.js';
+import { MOCK_DATA } from './models/mockData.js';
+import { storageService } from './models/storage.js';
 
 class App {
   constructor() {
     this.config = CONFIG;
+    this.mockData = MOCK_DATA;
+    this.storage = storageService;
     this.initialized = false;
   }
 
@@ -18,8 +22,12 @@ class App {
   async init() {
     console.info(`[${this.config.app_nome}] Inicializando versão ${this.config.versao} (${this.config.ambiente})...`);
     
-    // Verificação de ambiente e suporte a Web Storage
-    this.checkEnvironment();
+    // Inicialização da camada de persistência com semente de dados simulados
+    this.storage.initStorage(this.mockData);
+
+    // Registro de auditoria no console sobre a prontidão dos dados
+    console.info(`[${this.config.app_nome}] Camada de persistência inicializada. Storage ativo: ${this.storage.isStorageAvailable() ? 'LocalStorage' : 'Contingência memoryStore'}.`);
+    console.info(`[${this.config.app_nome}] Filiais carregadas: ${this.mockData.filiais.length} | Pratos no cardápio: ${this.mockData.cardapio.length}`);
 
     // Atualização dos ícones Lucide
     if (window.lucide) {
@@ -27,20 +35,7 @@ class App {
     }
 
     this.initialized = true;
-    console.info(`[${this.config.app_nome}] Infraestrutura base pronta para acoplamento dos módulos.`);
-  }
-
-  /**
-   * Valida compatibilidade básica do navegador
-   */
-  checkEnvironment() {
-    try {
-      const testKey = '__rn_test__';
-      localStorage.setItem(testKey, testKey);
-      localStorage.removeItem(testKey);
-    } catch (e) {
-      console.warn(`[${this.config.app_nome}] Web Storage restrito. O sistema utilizará contingência em memória.`);
-    }
+    console.info(`[${this.config.app_nome}] Fase 2 pronta: Modelos e Persistência carregados com sucesso.`);
   }
 }
 
@@ -48,6 +43,11 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
   const app = new App();
   app.init().catch(err => console.error('Erro na inicialização da aplicação:', err));
+
+  // Disponibilização no escopo global para facilitar inspeção e testes da banca acadêmica
+  window.__RN_APP__ = app;
+  window.__RN_STORAGE__ = storageService;
+  window.__RN_MOCK__ = MOCK_DATA;
 });
 
 export default App;
