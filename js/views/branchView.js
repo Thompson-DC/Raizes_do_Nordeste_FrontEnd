@@ -89,7 +89,7 @@ export const branchView = {
 
     const selectedBadge = isSelected
       ? `
-        <div class="absolute -top-3.5 right-4 z-10 inline-flex items-center gap-1.5 px-3 py-1 bg-[#C9962E] text-[#4A1304] border-[2px] border-[#3A0E03] rounded-full text-xs font-black shadow-tactile-sm">
+        <div class="absolute -top-3 right-3 z-10 inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#C9962E] text-[#4A1304] border-[2px] border-[#3A0E03] rounded-full text-[10px] sm:text-xs font-black shadow-tactile-sm">
           <span>★</span>
           <span>LOJA SELECIONADA</span>
         </div>
@@ -98,7 +98,7 @@ export const branchView = {
 
     const actionButton = isSelected
       ? `
-        <div class="w-full mt-4 py-2 px-4 rounded-full bg-[#B86A2C] text-white border-[2px] border-[#3A0E03] font-label-md text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-tactile-sm" aria-current="true">
+        <div class="w-full mt-3 py-1.5 px-3 rounded-full bg-[#B86A2C] text-white border-[2px] border-[#3A0E03] font-label-md text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-tactile-sm" aria-current="true">
           <i data-lucide="check-circle-2" class="w-4 h-4 text-[#ffdea8]"></i>
           <span>Filial Ativa</span>
         </div>
@@ -107,7 +107,7 @@ export const branchView = {
         <button
           type="button"
           data-branch-select="${branch.id}"
-          class="w-full mt-4 py-2 px-4 rounded-full bg-surface-container border-[2px] border-[#4A1304] text-[#4A1304] hover:bg-[#E9A36A] hover:text-[#4A1304] font-label-md text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-tactile-sm pressable transition-all"
+          class="w-full mt-3 py-1.5 px-3 rounded-full bg-surface-container border-[2px] border-[#4A1304] text-[#4A1304] hover:bg-[#E9A36A] hover:text-[#4A1304] font-label-md text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-tactile-sm pressable transition-all"
           aria-label="Selecionar filial ${branch.nome}"
         >
           <i data-lucide="check" class="w-4 h-4"></i>
@@ -121,19 +121,19 @@ export const branchView = {
         role="radio"
         aria-checked="${isSelected}"
         tabindex="0"
-        class="relative border-[2.5px] rounded-3xl p-4 sm:p-5 transition-all duration-200 cursor-pointer ${cardBgClass} flex flex-col justify-between"
+        class="relative border-[2.5px] rounded-3xl p-3 sm:p-4 transition-all duration-200 cursor-pointer ${cardBgClass} flex flex-col justify-between"
       >
         ${selectedBadge}
 
         <!-- Efeito Costura de Couro Interno (.stitch) -->
-        <div class="stitch p-3.5 flex flex-col justify-between flex-1 bg-surface-bright/40">
+        <div class="stitch p-3 flex flex-col justify-between flex-1 bg-surface-bright/40">
           <div>
             <!-- Cabeçalho do Card da Filial -->
-            <div class="flex items-start justify-between gap-2 mb-2">
-              <h3 class="font-headline-sm text-base sm:text-lg font-black text-[#4A1304] leading-snug">
+            <div class="flex items-start justify-between gap-1.5 mb-2">
+              <h3 class="font-headline-sm text-sm sm:text-base font-black text-[#4A1304] leading-snug">
                 ${branch.nome}
               </h3>
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold ${
                 branch.status === 'aberta' ? 'bg-[#25D366]/20 text-[#146c36] border border-[#25D366]' : 'bg-error-container text-error'
               }">
                 <span class="w-1.5 h-1.5 rounded-full ${branch.status === 'aberta' ? 'bg-[#25D366]' : 'bg-error'}"></span>
@@ -142,27 +142,27 @@ export const branchView = {
             </div>
 
             <!-- Endereço Físico -->
-            <p class="font-body-sm text-xs text-on-surface-variant flex items-start gap-1.5 mb-2.5">
-              <i data-lucide="map-pin" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>
-              <span>${branch.endereco}</span>
+            <p class="font-body-sm text-[11px] sm:text-xs text-on-surface-variant flex items-start gap-1 mb-2">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-primary shrink-0 mt-0.5"></i>
+              <span class="line-clamp-2">${branch.endereco}</span>
             </p>
 
             <!-- Horário e Tempo Estimado -->
-            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-[#4A1304]/15 text-xs text-on-surface-variant">
+            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[#4A1304]/15 text-[11px] text-on-surface-variant">
               <span class="inline-flex items-center gap-1">
-                <i data-lucide="clock" class="w-3.5 h-3.5 text-secondary"></i>
+                <i data-lucide="clock" class="w-3 h-3 text-secondary"></i>
                 <span>${branch.horario}</span>
               </span>
               <span class="text-[#4A1304]/30">•</span>
               <span class="inline-flex items-center gap-1 font-bold text-primary">
-                <i data-lucide="timer" class="w-3.5 h-3.5"></i>
-                <span>Preparo: ~${branch.tempo_estimado}</span>
+                <i data-lucide="timer" class="w-3 h-3"></i>
+                <span>~${branch.tempo_estimado}</span>
               </span>
             </div>
           </div>
 
           <!-- Botão de Ação -->
-          <div class="pt-2">
+          <div class="pt-1">
             ${actionButton}
           </div>
         </div>
