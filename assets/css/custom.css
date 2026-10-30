@@ -33,7 +33,38 @@
 }
 
 /* ==========================================================================
-   3. GRID INTELIGENTE ADAPTATIVO & CANAIS DE AUTOATENDIMENTO
+   3. CABEÇALHO MULTICANAL E CONTROLE DE FILIAL (Opção 1: Header + Sub-barra)
+   ========================================================================== */
+.header-branch-desktop {
+  display: none !important;
+}
+
+.header-branch-subbar {
+  display: flex !important;
+}
+
+/* No canal Web Desktop: Filial inline ao lado da sacola e sub-barra oculta */
+.channel-web .header-branch-desktop {
+  display: flex !important;
+}
+
+.channel-web .header-branch-subbar {
+  display: none !important;
+}
+
+/* Nos canais App e Totem: Badge inline oculto e sub-barra dedicada visível */
+.channel-app .header-branch-desktop,
+.channel-totem .header-branch-desktop {
+  display: none !important;
+}
+
+.channel-app .header-branch-subbar,
+.channel-totem .header-branch-subbar {
+  display: flex !important;
+}
+
+/* ==========================================================================
+   4. GRID INTELIGENTE ADAPTATIVO & CANAIS DE AUTOATENDIMENTO
    ========================================================================== */
 
 /* Grid flexível por largura mínima de card (Auto-fit Minmax) */
@@ -122,6 +153,11 @@
   .channel-web .grid-branches {
     grid-template-columns: 1fr !important;
   }
+}
+
+.btn-category-chip {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 /* Garantia de área de toque mínima de 48px para conformidade WCAG AA no Totem */
