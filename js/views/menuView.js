@@ -149,9 +149,9 @@ export const menuView = {
           </span>
         </div>
 
-        <!-- Barra Horizontal Deslizável de Chips -->
-        <nav aria-label="Filtro de Categorias do Cardápio" class="w-full overflow-x-auto pb-2 scrollbar-none">
-          <div class="flex items-center gap-2 sm:gap-2.5 min-w-max" role="tablist">
+        <!-- Barra de Chips de Categorias (Wrap Responsivo Sem Cortes) -->
+        <nav aria-label="Filtro de Categorias do Cardápio" class="w-full">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full" role="tablist">
             ${categories.map(cat => {
               const isActive = cat.id === activeCategoryId;
               const activeClass = isActive
@@ -164,7 +164,7 @@ export const menuView = {
                   role="tab"
                   aria-selected="${isActive ? 'true' : 'false'}"
                   data-category-id="${cat.id}"
-                  class="btn-category-chip px-3.5 sm:px-4 py-2 rounded-full border-[2px] font-label-md text-xs sm:text-sm font-black transition-all flex items-center gap-1.5 cursor-pointer select-none active:translate-y-0.5 ${activeClass}"
+                  class="btn-category-chip px-3.5 sm:px-4 py-2 rounded-full border-[2px] font-label-md text-xs sm:text-sm font-black transition-all flex items-center gap-1.5 cursor-pointer select-none active:translate-y-0.5 whitespace-nowrap flex-shrink-0 ${activeClass}"
                 >
                   <span>${cat.nome}</span>
                 </button>

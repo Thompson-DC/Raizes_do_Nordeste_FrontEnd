@@ -50,7 +50,7 @@ class CartController {
     // Registra ouvinte para alteração de filial (Fase 4)
     window.addEventListener('rn:branch-changed', (event) => {
       if (event && event.detail && event.detail.branchId) {
-        this.handleBranchChange(event.detail.branchId);
+        this.handleBranchChange(event.detail.branchId, event.detail.unavailableDishes || []);
       }
     });
 
@@ -157,17 +157,40 @@ class CartController {
 
   /**
    * Trata alteração de filial disparada externamente
+   * Valida estoque de todos os itens e remove pratos esgotados na nova unidade (Regra FSD 14.1)
    * @param {string} branchId 
+   * @param {Array<string>} [knownUnavailable=[]]
    */
-  handleBranchChange(branchId) {
-    if (this.cart.filial_id === branchId) return;
-
+  handleBranchChange(branchId, knownUnavailable = []) {
     this.cart.filial_id = branchId;
     this._updateActiveBranch(branchId);
+
+    // Validação estrita de disponibilidade dos itens da sacola na nova filial (FSD 14.1)
+    const removedDishes = [];
+    if (Array.isArray(this.cart.itens) && this.cart.itens.length > 0) {
+      this.cart.itens = this.cart.itens.filter(item => {
+        const dish = MOCK_DATA.cardapio.find(d => d.id === item.produto_id);
+        const isAvailable = dish && dish.disponibilidade ? (dish.disponibilidade[branchId] !== false) : true;
+        if (!isAvailable) {
+          removedDishes.push(item.nome);
+        }
+        return isAvailable;
+      });
+    }
+
     this._persistAndNotify();
     this.render();
 
-    console.info(`[CartController] Filial do carrinho atualizada para: ${branchId}`);
+    // Se houve remoção de pratos esgotados na nova filial, notifica com toast de alerta
+    if (removedDishes.length > 0) {
+      const branchName = this.activeBranch ? this.activeBranch.nome : branchId;
+      cartView.showToast(
+        `O prato "${removedDishes.join(', ')}" está esgotado na filial ${branchName} e foi removido da sua sacola.`,
+        'warning'
+      );
+    }
+
+    console.info(`[CartController] Filial do carrinho atualizada para: ${branchId}. Pratos indisponíveis removidos: ${removedDishes.length}`);
   }
 
   /**

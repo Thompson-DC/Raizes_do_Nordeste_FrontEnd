@@ -385,5 +385,61 @@ export const cartView = {
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
+  },
+
+  /**
+   * Exibe toast de alerta/aviso temporário e não-bloqueante no topo da tela
+   * @param {string} message - Texto informativo
+   * @param {'info' | 'warning' | 'success'} [type='info'] - Tipo visual do toast
+   */
+  showToast(message, type = 'info') {
+    if (typeof document === 'undefined' || !document.body) return;
+
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'toast-container';
+      toastContainer.className = 'fixed top-16 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none w-full max-w-sm sm:max-w-md px-4';
+      if (document.body && typeof document.body.appendChild === 'function') {
+        document.body.appendChild(toastContainer);
+      }
+    }
+
+    if (!toastContainer || typeof toastContainer.appendChild !== 'function') return;
+
+    const toast = document.createElement('div');
+    const isWarning = type === 'warning';
+    toast.className = `w-full pointer-events-auto border-[2.5px] border-[#4A1304] rounded-2xl p-3.5 shadow-tactile-lg text-xs font-bold flex items-center gap-2.5 transition-all duration-300 transform -translate-y-4 opacity-0 ${
+      isWarning ? 'bg-[#FFDAD6] text-[#93000A]' : 'bg-surface-container-high text-[#4A1304]'
+    }`;
+
+    toast.innerHTML = `
+      <i data-lucide="${isWarning ? 'alert-triangle' : 'info'}" class="w-4 h-4 shrink-0 text-error"></i>
+      <span class="flex-1 leading-snug">${this.escapeHtml(message)}</span>
+      <button type="button" class="shrink-0 text-[#4A1304] hover:opacity-75 p-1" title="Fechar aviso">
+        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+      </button>
+    `;
+
+    const closeBtn = toast.querySelector('button');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        toast.remove();
+      });
+    }
+
+    toastContainer.appendChild(toast);
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+
+    requestAnimationFrame(() => {
+      toast.classList.remove('-translate-y-4', 'opacity-0');
+    });
+
+    setTimeout(() => {
+      toast.classList.add('opacity-0', '-translate-y-4');
+      setTimeout(() => toast.remove(), 350);
+    }, 5000);
   }
 };

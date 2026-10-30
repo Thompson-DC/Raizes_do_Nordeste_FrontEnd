@@ -178,28 +178,146 @@ export const branchView = {
    * @param {Object|null} branch - Filial selecionada
    */
   updateActiveBranchBadge(badgeElement, branch) {
-    if (!badgeElement) return;
+    const targets = typeof document !== 'undefined' ? document.querySelectorAll('.active-branch-badge-target') : [];
+    const elementsToUpdate = targets.length > 0 ? Array.from(targets) : (badgeElement ? [badgeElement] : []);
 
-    if (!branch) {
-      badgeElement.innerHTML = `
-        <i data-lucide="store" class="w-4 h-4 text-primary"></i>
-        <span class="text-xs font-bold text-on-surface">Selecione uma filial</span>
-      `;
-      return;
+    elementsToUpdate.forEach(el => {
+      if (!branch) {
+        el.innerHTML = `
+          <i data-lucide="store" class="w-4 h-4 text-primary shrink-0"></i>
+          <span class="text-xs font-bold text-on-surface truncate">Selecione uma filial</span>
+        `;
+      } else {
+        el.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="w-2 h-2 rounded-full bg-[#25D366] animate-pulse shrink-0"></span>
+            <i data-lucide="store" class="w-4 h-4 text-primary shrink-0"></i>
+            <div class="flex flex-col text-left min-w-0">
+              <span class="text-[10px] uppercase tracking-wider font-extrabold text-secondary leading-none">Filial Ativa</span>
+              <span class="text-xs font-black text-[#4A1304] leading-tight truncate">${branch.nome}</span>
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    if (typeof window !== 'undefined' && window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
     }
+  },
 
-    badgeElement.innerHTML = `
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-[#25D366] animate-pulse"></span>
-        <i data-lucide="store" class="w-4 h-4 text-primary"></i>
-        <div class="flex flex-col text-left">
-          <span class="text-[10px] uppercase tracking-wider font-extrabold text-secondary">Filial Ativa</span>
-          <span class="text-xs font-black text-[#4A1304] leading-none">${branch.nome}</span>
+  /**
+   * Sanitização contra injeção de HTML/XSS
+   * @param {string} str 
+   * @returns {string}
+   */
+  escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  },
+
+  /**
+   * Renderiza o modal de confirmação de troca de filial com carrinho ativo (Regra FSD 14.1)
+   * @param {HTMLElement} container - Elemento #modal-container
+   * @param {Object} currentBranch - Filial atualmente ativa
+   * @param {Object} newBranch - Nova filial pretendida
+   * @param {Array<string>} unavailableDishes - Nomes dos pratos esgotados na nova filial
+   * @param {Function} onConfirm - Callback ao confirmar
+   * @param {Function} onCancel - Callback ao cancelar
+   */
+  renderBranchChangeModal(container, currentBranch, newBranch, unavailableDishes, onConfirm, onCancel) {
+    if (!container) return;
+
+    const currentName = currentBranch ? currentBranch.nome : 'Filial Atual';
+    const newName = newBranch ? newBranch.nome : 'Nova Filial';
+    const hasUnavailable = Array.isArray(unavailableDishes) && unavailableDishes.length > 0;
+
+    container.innerHTML = `
+      <div id="branch-modal-overlay" class="fixed inset-0 bg-[#211b0f]/65 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-200">
+        <div 
+          role="dialog" 
+          aria-modal="true" 
+          aria-labelledby="branch-modal-title"
+          class="bg-surface-container-lowest border-[2.5px] border-[#4A1304] rounded-3xl p-5 sm:p-6 max-w-md w-full shadow-tactile-lg flex flex-col gap-4 animate-scale-in"
+        >
+          <!-- Ícone e Título -->
+          <div class="flex flex-col items-center text-center gap-2">
+            <div class="w-12 h-12 rounded-full ${hasUnavailable ? 'bg-error-container text-error' : 'bg-secondary-container text-[#4A1304]'} border-[2px] border-[#4A1304] flex items-center justify-center shadow-tactile-sm">
+              <i data-lucide="${hasUnavailable ? 'alert-triangle' : 'store'}" class="w-6 h-6"></i>
+            </div>
+            <h3 id="branch-modal-title" class="font-headline-sm text-lg sm:text-xl font-black text-[#4A1304] leading-tight">
+              Trocar Filial de Retirada?
+            </h3>
+            <p class="font-body-sm text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+              Você já possui itens na sua sacola vinculados à unidade <strong>${this.escapeHtml(currentName)}</strong>.
+            </p>
+          </div>
+
+          <!-- Alerta de Itens Esgotados se houver -->
+          ${hasUnavailable ? `
+            <div class="bg-error-container/40 border-[2px] border-error rounded-2xl p-3.5 text-xs text-[#93000a] flex items-start gap-2.5">
+              <i data-lucide="info" class="w-4 h-4 text-error shrink-0 mt-0.5"></i>
+              <div class="flex-1">
+                <span class="font-black block uppercase text-[11px] tracking-wider mb-0.5">Itens Indisponíveis na Nova Loja</span>
+                <span>Na unidade <strong>${this.escapeHtml(newName)}</strong>, o(s) prato(s) <strong>${unavailableDishes.map(d => `"${this.escapeHtml(d)}"`).join(', ')}</strong> não possui(em) estoque e será(ão) removido(s) da sua sacola.</span>
+              </div>
+            </div>
+          ` : `
+            <div class="bg-surface-container border-[1.5px] border-[#4A1304]/30 rounded-2xl p-3 text-xs text-on-surface-variant flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-4 h-4 text-[#25D366] shrink-0"></i>
+              <span>Todos os pratos da sua sacola estão disponíveis na unidade <strong>${this.escapeHtml(newName)}</strong>.</span>
+            </div>
+          `}
+
+          <!-- Botões de Ação -->
+          <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-[#4A1304]/15">
+            <button 
+              type="button" 
+              id="btn-branch-modal-cancel" 
+              class="flex-1 sm:flex-none py-2.5 px-4 rounded-full border-[2px] border-[#4A1304] bg-surface-container hover:bg-surface-dim font-bold text-xs text-[#4A1304] shadow-tactile-sm pressable transition-all cursor-pointer"
+            >
+              Manter ${this.escapeHtml(currentName.split('-')[0].trim())}
+            </button>
+            <button 
+              type="button" 
+              id="btn-branch-modal-confirm" 
+              class="flex-1 sm:flex-none py-2.5 px-5 rounded-full border-[2.5px] border-[#4A1304] bg-primary-container hover:bg-[#EEB382] font-black text-xs text-[#4A1304] shadow-tactile-md pressable transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>Confirmar Troca</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
         </div>
       </div>
     `;
 
-    badgeElement.classList.remove('hidden');
-    badgeElement.classList.add('flex');
+    if (typeof window !== 'undefined' && window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+
+    const close = () => {
+      container.innerHTML = '';
+    };
+
+    const cancelBtn = container.querySelector('#btn-branch-modal-cancel');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        close();
+        if (typeof onCancel === 'function') onCancel();
+      });
+    }
+
+    const confirmBtn = container.querySelector('#btn-branch-modal-confirm');
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', () => {
+        close();
+        if (typeof onConfirm === 'function') onConfirm();
+      });
+    }
   }
 };

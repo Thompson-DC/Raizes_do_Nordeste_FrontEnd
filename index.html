@@ -148,24 +148,44 @@
     <div id="app-container" class="w-full max-w-7xl bg-surface border-[2.5px] border-[#4A1304] rounded-3xl shadow-tactile-md overflow-hidden flex flex-col min-h-[85vh] transition-all duration-300">
       
       <!-- Cabeçalho da Aplicação de Autoatendimento -->
-      <section id="app-header-container" class="w-full border-b-[2.5px] border-[#4A1304] bg-surface-container-high p-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <img src="./assets/img/logo.png" alt="Raízes do Nordeste" class="h-10 w-auto object-contain">
-          <div>
-            <h1 class="font-headline-md text-xl sm:text-2xl font-black text-[#4A1304] leading-tight">Raízes do Nordeste</h1>
-            <p class="font-editorial-accent italic text-xs text-secondary">Sabores autênticos do sertão à sua mesa</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2 sm:gap-3">
-          <div id="active-branch-badge" class="hidden sm:flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border-[2px] border-[#4A1304]">
-            <i data-lucide="store" class="w-4 h-4 text-primary"></i>
-            <span class="text-xs font-bold text-on-surface">Selecione uma filial</span>
+      <section id="app-header-container" class="w-full border-b-[2.5px] border-[#4A1304] bg-surface-container-high flex flex-col transition-all">
+        <!-- Linha Superior: Marca e Ações -->
+        <div class="w-full p-3 sm:p-4 flex items-center justify-between gap-3">
+          <!-- Identidade da Marca -->
+          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <img src="./assets/img/logo.png" alt="Raízes do Nordeste" class="h-9 sm:h-10 w-auto object-contain shrink-0">
+            <div class="min-w-0">
+              <h1 class="font-headline-md text-lg sm:text-2xl font-black text-[#4A1304] leading-tight truncate">Raízes do Nordeste</h1>
+              <p class="font-editorial-accent italic text-[11px] sm:text-xs text-secondary truncate">Sabores autênticos do sertão à sua mesa</p>
+            </div>
           </div>
 
-          <button id="cart-header-btn" type="button" class="flex items-center gap-2 bg-primary-container px-3.5 py-1.5 rounded-full border-[2px] border-[#4A1304] shadow-tactile-sm pressable font-bold text-xs text-[#4A1304] transition-all hover:bg-[#EEB382]" title="Ver Sacola de Compras" aria-label="Abrir sacola de compras">
-            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-            <span id="cart-header-count" class="bg-[#4A1304] text-white text-[11px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center">0</span>
-            <span id="cart-header-total" class="hidden sm:inline font-black text-[#4A1304]">R$ 0,00</span>
+          <!-- Lado Direito: Badge da Filial (Desktop) + Botão da Sacola -->
+          <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+            <!-- Badge de Filial Exclusivo para Desktop (Linha Única) -->
+            <div id="active-branch-badge" class="active-branch-badge-target header-branch-desktop hidden items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border-[2px] border-[#4A1304]">
+              <i data-lucide="store" class="w-4 h-4 text-primary"></i>
+              <span class="text-xs font-bold text-on-surface">Selecione uma filial</span>
+            </div>
+
+            <!-- Botão da Sacola -->
+            <button id="cart-header-btn" type="button" class="flex items-center gap-1.5 sm:gap-2 bg-primary-container px-3 sm:px-3.5 py-1.5 rounded-full border-[2px] border-[#4A1304] shadow-tactile-sm pressable font-bold text-xs text-[#4A1304] transition-all hover:bg-[#EEB382] shrink-0" title="Ver Sacola de Compras" aria-label="Abrir sacola de compras">
+              <i data-lucide="shopping-bag" class="w-4 h-4 shrink-0"></i>
+              <span id="cart-header-count" class="bg-[#4A1304] text-white text-[11px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center">0</span>
+              <span id="cart-header-total" class="font-black text-[#4A1304] text-xs">R$ 0,00</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub-barra de Filial Dedicada para Canais Móveis (Opção 1) -->
+        <div id="active-branch-subbar" class="header-branch-subbar w-full bg-surface-container px-3.5 py-2 border-t-[1.5px] border-[#4A1304]/20 flex items-center justify-between gap-2 text-xs">
+          <div id="active-branch-badge-mobile" class="active-branch-badge-target flex items-center gap-2 min-w-0">
+            <i data-lucide="store" class="w-4 h-4 text-primary shrink-0"></i>
+            <span class="text-xs font-bold text-on-surface truncate">Selecione uma filial</span>
+          </div>
+          <button type="button" onclick="document.getElementById('branches-container')?.scrollIntoView({behavior:'smooth'})" class="text-[11px] font-extrabold text-secondary hover:text-primary hover:underline shrink-0 flex items-center gap-1 cursor-pointer" title="Alterar filial de retirada">
+            <span>Trocar</span>
+            <i data-lucide="arrow-right-left" class="w-3 h-3"></i>
           </button>
         </div>
       </section>

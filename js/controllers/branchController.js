@@ -57,8 +57,9 @@ class BranchController {
 
   /**
    * Seleciona uma filial e persiste no estado local
+   * Se houver itens no carrinho, solicita confirmação e valida itens esgotados (FSD 14.1)
    * @param {string} branchId - ID da filial escolhida
-   * @returns {boolean} Retorna true se a seleção foi bem-sucedida
+   * @returns {boolean} Retorna true se a seleção foi concluída imediatamente
    */
   selectBranch(branchId) {
     if (!this.isValidBranchId(branchId)) {
@@ -70,6 +71,54 @@ class BranchController {
       return true; // Já está selecionada
     }
 
+    const currentBranch = this.getActiveBranch();
+    const newBranch = this.branches.find(b => b.id === branchId);
+    const cart = storageService.getCart();
+
+    const hasItems = cart && Array.isArray(cart.itens) && cart.itens.length > 0;
+
+    // Se o cliente possuir itens na sacola, abre modal de confirmação (Regra FSD 14.1)
+    if (hasItems) {
+      const unavailableDishes = [];
+      cart.itens.forEach(item => {
+        const dish = MOCK_DATA.cardapio.find(d => d.id === item.produto_id);
+        if (dish && dish.disponibilidade && dish.disponibilidade[branchId] === false) {
+          unavailableDishes.push(dish.nome);
+        }
+      });
+
+      const modalContainer = document.getElementById('modal-container');
+      if (modalContainer && typeof branchView.renderBranchChangeModal === 'function') {
+        branchView.renderBranchChangeModal(
+          modalContainer,
+          currentBranch,
+          newBranch,
+          unavailableDishes,
+          () => {
+            // Confirmou: aplica a alteração de filial
+            this._applyBranchChange(branchId, unavailableDishes);
+          },
+          () => {
+            // Cancelou: re-renderiza para manter a loja atual selecionada
+            this.render();
+          }
+        );
+        return false;
+      }
+    }
+
+    // Sem itens na sacola: aplica a alteração diretamente
+    return this._applyBranchChange(branchId, []);
+  }
+
+  /**
+   * Executa a mutação de filial, persiste no carrinho e notifica o ecossistema
+   * @private
+   * @param {string} branchId 
+   * @param {Array<string>} unavailableDishes 
+   * @returns {boolean}
+   */
+  _applyBranchChange(branchId, unavailableDishes = []) {
     this.activeBranchId = branchId;
 
     // Persistência no carrinho ativo
@@ -86,7 +135,8 @@ class BranchController {
     const event = new CustomEvent('rn:branch-changed', {
       detail: {
         branchId: this.activeBranchId,
-        branch: selectedBranch
+        branch: selectedBranch,
+        unavailableDishes
       }
     });
     window.dispatchEvent(event);
