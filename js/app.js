@@ -13,6 +13,7 @@ import { branchController } from './controllers/branchController.js';
 import { menuController } from './controllers/menuController.js';
 import { cartController } from './controllers/cartController.js';
 import { lgpdController } from './controllers/lgpdController.js';
+import { checkoutController } from './controllers/checkoutController.js';
 
 class App {
   constructor() {
@@ -25,6 +26,7 @@ class App {
     this.menuController = menuController;
     this.cartController = cartController;
     this.lgpdController = lgpdController;
+    this.checkoutController = checkoutController;
     this.initialized = false;
   }
 
@@ -59,13 +61,17 @@ class App {
     this.lgpdController.init();
     console.info(`[${this.config.app_nome}] Conformidade LGPD e Banner de Cookies inicializados.`);
 
-    // 7. Atualização e renderização dos ícones Lucide
+    // 7. Inicialização do controlador do gateway de pagamento mockado (Fase 9)
+    this.checkoutController.init();
+    console.info(`[${this.config.app_nome}] Gateway de Pagamento Mockado inicializado.`);
+
+    // 8. Atualização e renderização dos ícones Lucide
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
 
     this.initialized = true;
-    console.info(`[${this.config.app_nome}] Fase 8 pronta: Identificação do Cliente e Conformidade LGPD ativas e integradas.`);
+    console.info(`[${this.config.app_nome}] Fase 9 pronta: Gateway de Pagamento Mockado ativo e integrado.`);
   }
 }
 
@@ -84,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.__RN_MENU__ = menuController;
   window.__RN_CART__ = cartController;
   window.__RN_LGPD__ = lgpdController;
+  window.__RN_CHECKOUT__ = checkoutController;
 });
 
 export default App;
