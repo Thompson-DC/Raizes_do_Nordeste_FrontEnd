@@ -259,29 +259,7 @@ body.wireframe-mode #app-container small {
   color: #555555 !important;
 }
 
-/* Elementos escuros do wireframe mantêm texto claro legível */
-body.wireframe-mode #app-container button.bg-primary,
-body.wireframe-mode #app-container .bg-\[\#4A1304\],
-body.wireframe-mode #app-container .bg-\[\#211b0f\],
-body.wireframe-mode #app-container .bg-dark-wireframe {
-  background-color: #222222 !important;
-  color: #ffffff !important;
-}
-
-body.wireframe-mode #app-container button.bg-primary *,
-body.wireframe-mode #app-container .bg-\[\#4A1304\] *,
-body.wireframe-mode #app-container .bg-\[\#211b0f\] * {
-  color: #ffffff !important;
-  stroke: #ffffff !important;
-}
-
-/* 4.3. Ícones SVG em Escala de Cinza Neutra */
-body.wireframe-mode #app-container svg,
-body.wireframe-mode #app-container [data-lucide] {
-  stroke: #222222 !important;
-}
-
-/* 4.4. Estrutura, Caixas e Contornos Tracejados */
+/* 4.3. Estrutura, Caixas e Contornos Tracejados */
 body.wireframe-mode #app-container {
   background-color: #ffffff !important;
   border-color: #222222 !important;
@@ -300,28 +278,53 @@ body.wireframe-mode input {
   box-shadow: none !important;
 }
 
-/* Fundos coloridos convertidos para escala de cinza estrutural */
-body.wireframe-mode [class*="bg-surface"],
-body.wireframe-mode [class*="bg-primary"],
-body.wireframe-mode [class*="bg-secondary"],
-body.wireframe-mode [class*="bg-tertiary"],
-body.wireframe-mode [class*="bg-\[\#25D366"],
-body.wireframe-mode [class*="bg-\[\#E9A36A"],
-body.wireframe-mode [class*="bg-\[\#C9962E"],
-body.wireframe-mode [class*="bg-\[\#BA1A1A"],
-body.wireframe-mode [class*="bg-\[\#ffdea8"] {
+/* Fundos coloridos convertidos universalmente para escala de cinza estrutural */
+body.wireframe-mode #app-container [class*="bg-"] {
   background-color: #f2f2f2 !important;
   background-image: none !important;
 }
 
-/* Bordas tracejadas estruturais */
+/* Elementos escuros e botões ativos do wireframe mantêm alto contraste e texto claro */
+body.wireframe-mode #app-container .btn-active-branch,
+body.wireframe-mode #app-container [class*="bg-[#B86A2C]"],
+body.wireframe-mode #app-container [class*="bg-\[\#B86A2C\]"],
+body.wireframe-mode #app-container [aria-current="true"],
+body.wireframe-mode #app-container button.bg-primary,
+body.wireframe-mode #app-container .bg-\[\#4A1304\],
+body.wireframe-mode #app-container .bg-\[\#211b0f\],
+body.wireframe-mode #app-container .bg-dark-wireframe {
+  background-color: #2b2b2b !important;
+  color: #ffffff !important;
+  border-color: #111111 !important;
+}
+
+body.wireframe-mode #app-container .btn-active-branch *,
+body.wireframe-mode #app-container [class*="bg-[#B86A2C]"] *,
+body.wireframe-mode #app-container [class*="bg-\[\#B86A2C\]"] *,
+body.wireframe-mode #app-container [aria-current="true"] *,
+body.wireframe-mode #app-container button.bg-primary *,
+body.wireframe-mode #app-container .bg-\[\#4A1304\] *,
+body.wireframe-mode #app-container .bg-\[\#211b0f\] * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* 4.4. Ícones SVG em Escala de Cinza Neutra */
+body.wireframe-mode #app-container svg,
+body.wireframe-mode #app-container [data-lucide] {
+  stroke: #222222 !important;
+}
+
+/* Bordas e anéis tracejados estruturais */
 body.wireframe-mode .stitch,
-body.wireframe-mode [class*="border"] {
+body.wireframe-mode [class*="border"],
+body.wireframe-mode [class*="border-"] {
   border-style: dashed !important;
   border-color: #444444 !important;
 }
 
 /* Anéis de destaque e pulso convertidos para cinza neutro */
+body.wireframe-mode .ring-2,
 body.wireframe-mode .ring-4,
 body.wireframe-mode [class*="ring-"] {
   --tw-ring-color: #888888 !important;
