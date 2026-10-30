@@ -275,3 +275,29 @@ html {
   animation: fadeOut 0.15s ease-in forwards;
 }
 
+/* ==========================================================================
+   7. LINHA DO TEMPO DE PRODUÇÃO (Fase 10: Stepper)
+   ========================================================================== */
+#timeline-container {
+  width: 100%;
+}
+
+#timeline-progress-bar {
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.channel-app #timeline-card,
+.channel-totem #timeline-card {
+  padding: 1rem !important;
+}
+
+/* No Modo Wireframe, desativa gradientes na barra de progresso */
+body.wireframe-mode #timeline-progress-bar {
+  background: #555555 !important;
+}
+
+body.wireframe-mode [id*="timeline-"] {
+  border-style: dashed !important;
+}
+
+
