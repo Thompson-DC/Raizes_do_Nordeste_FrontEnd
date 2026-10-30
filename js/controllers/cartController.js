@@ -67,6 +67,12 @@ class CartController {
       }
     });
 
+    // Registra ouvinte para aprovação de pedido (Fase 9 - Limpeza da sacola após sucesso)
+    window.addEventListener('rn:order-approved', () => {
+      this.clearCart();
+      console.info('[CartController] Pedido aprovado no gateway. Sacola limpa com sucesso.');
+    });
+
     // Vincula clique do botão do cabeçalho para navegar ou abrir a sacola
     const headerCartBtn = document.getElementById('cart-header-btn');
     if (headerCartBtn) {
