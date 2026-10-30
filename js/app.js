@@ -59,7 +59,7 @@ class App {
     }
 
     this.initialized = true;
-    console.info(`[${this.config.app_nome}] Fase 6 pronta: Sacola de Compras e Resumo Financeiro ativos.`);
+    console.info(`[${this.config.app_nome}] Fase 7 pronta: Programa de Fidelidade 'Nordeste Pontos' ativo e integrado à sacola.`);
   }
 }
 

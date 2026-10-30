@@ -4,6 +4,7 @@
  * Conforme especificado em docs/FSD.md e docs/DESIGN.md
  */
 
+import { CONFIG } from '../../config/config.js';
 import { MOCK_DATA } from '../models/mockData.js';
 import { storageService } from '../models/storage.js';
 import { cartView } from '../views/cartView.js';
@@ -14,6 +15,7 @@ class CartController {
     this.container = null;
     this.mobileBarContainer = null;
     this.activeBranch = null;
+    this.client = null;
     this.currentChannel = 'web';
     this.initialized = false;
   }
@@ -26,6 +28,9 @@ class CartController {
   init(containerId = 'cart-container', mobileBarId = 'mobile-cart-bar') {
     this.container = document.getElementById(containerId);
     this.mobileBarContainer = document.getElementById(mobileBarId);
+
+    // Carrega ou inicializa dados do cliente fidelizado
+    this.client = storageService.getClient() || { ...MOCK_DATA.cliente_padrao };
 
     // Carrega ou inicializa o carrinho a partir do storage
     this.cart = this._loadCart();
@@ -108,6 +113,7 @@ class CartController {
 
   /**
    * Recalcula subtotais e totais garantindo integridade matemática
+   * Conforme especificado em docs/FSD.md (Seções 6.5 e 14.3)
    * @private
    * @param {Object} cart 
    * @returns {Object}
@@ -115,6 +121,15 @@ class CartController {
   _recalculateTotals(cart) {
     if (!Array.isArray(cart.itens)) {
       cart.itens = [];
+    }
+
+    // Se a sacola estiver vazia, zera todos os montantes e desativa fidelidade
+    if (cart.itens.length === 0) {
+      cart.subtotal = 0;
+      cart.pontos_usados = 0;
+      cart.valor_desconto = 0;
+      cart.total = 0;
+      return cart;
     }
 
     // Recalcula o subtotal de cada item
@@ -128,9 +143,18 @@ class CartController {
     });
 
     cart.subtotal = Number(subtotal.toFixed(2));
+
+    // Se houver pontos resgatados, recalcula desconto com base na regra de conversão (FSD 14.3)
+    if (Number(cart.pontos_usados) > 0) {
+      const rate = (CONFIG.fidelidade && CONFIG.fidelidade.pontos_por_real) || 10;
+      cart.valor_desconto = Number((Number(cart.pontos_usados) / rate).toFixed(2));
+    } else {
+      cart.valor_desconto = 0;
+    }
+
     const discount = Number(cart.valor_desconto) || 0;
 
-    // Total travado no piso de R$ 0,00 conforme regra de negócio
+    // Total travado no piso de R$ 0,00 conforme regra estrita de negócio (FSD 14.3)
     cart.total = Number(Math.max(0, cart.subtotal - discount).toFixed(2));
 
     return cart;
@@ -307,6 +331,106 @@ class CartController {
     console.info('[CartController] Sacola de compras esvaziada com sucesso.');
   }
 
+  // ==========================================
+  // Métodos do Programa de Fidelidade (Fase 7)
+  // Conforme especificado em docs/FSD.md (Seção 6.5 e 14.3)
+  // ==========================================
+
+  /**
+   * Verifica se o desconto de fidelidade está ativo no carrinho
+   * @returns {boolean}
+   */
+  isLoyaltyApplied() {
+    return Boolean(this.cart && (Number(this.cart.pontos_usados) > 0 || Number(this.cart.valor_desconto) > 0));
+  }
+
+  /**
+   * Retorna o saldo de pontos disponível para o cliente
+   * @returns {number}
+   */
+  getLoyaltyBalance() {
+    if (this.client && this.client.saldo_pontos !== undefined) {
+      return Number(this.client.saldo_pontos);
+    }
+    const storedClient = storageService.getClient();
+    if (storedClient && storedClient.saldo_pontos !== undefined) {
+      this.client = storedClient;
+      return Number(storedClient.saldo_pontos);
+    }
+    return (CONFIG.fidelidade && CONFIG.fidelidade.saldo_padrao) || 150;
+  }
+
+  /**
+   * Alterna a aplicação dos pontos de fidelidade "Nordeste Pontos"
+   * @param {boolean} [apply] Se omitido, inverte o estado atual
+   */
+  toggleLoyalty(apply) {
+    const shouldApply = (apply !== undefined) ? Boolean(apply) : !this.isLoyaltyApplied();
+
+    if (shouldApply) {
+      if (this.getItemCount() <= 0) {
+        cartView.showToast('Adicione ao menos um prato antes de aplicar seus pontos de fidelidade.', 'warning');
+        return;
+      }
+
+      const availablePoints = this.getLoyaltyBalance();
+      const pointsPerReal = (CONFIG.fidelidade && CONFIG.fidelidade.pontos_por_real) || 10;
+      const discount = Number((availablePoints / pointsPerReal).toFixed(2));
+
+      this.cart.pontos_usados = availablePoints;
+      this.cart.valor_desconto = discount;
+
+      this._persistAndNotify();
+      this.render();
+
+      // Emite evento reativo de fidelidade
+      window.dispatchEvent(new CustomEvent('rn:loyalty-toggled', {
+        detail: {
+          applied: true,
+          points: availablePoints,
+          discount,
+          total: this.cart.total
+        }
+      }));
+
+      cartView.showToast(`Benefício Nordeste Pontos ativado! Desconto de ${cartView.formatCurrency(discount)} aplicado.`, 'success');
+      console.info(`[CartController] Fidelidade ativada: ${availablePoints} pontos (Desconto: R$ ${discount.toFixed(2)}). Novo total: R$ ${this.cart.total}`);
+    } else {
+      this.cart.pontos_usados = 0;
+      this.cart.valor_desconto = 0;
+
+      this._persistAndNotify();
+      this.render();
+
+      // Emite evento reativo de fidelidade
+      window.dispatchEvent(new CustomEvent('rn:loyalty-toggled', {
+        detail: {
+          applied: false,
+          points: 0,
+          discount: 0,
+          total: this.cart.total
+        }
+      }));
+
+      cartView.showToast('Desconto de fidelidade removido.', 'info');
+      console.info(`[CartController] Fidelidade desativada. Novo total: R$ ${this.cart.total}`);
+    }
+  }
+
+  /**
+   * Aplica explicitamente o desconto de fidelidade
+   */
+  applyLoyaltyDiscount() {
+    this.toggleLoyalty(true);
+  }
+
+  /**
+   * Remove explicitamente o desconto de fidelidade
+   */
+  removeLoyaltyDiscount() {
+    this.toggleLoyalty(false);
+  }
+
   /**
    * Ação de avançar para checkout / identificação
    */
@@ -372,11 +496,13 @@ class CartController {
       this.container,
       this.cart,
       this.activeBranch,
+      this.client,
       {
         onIncrease: (id) => this.increaseQuantity(id),
         onDecrease: (id) => this.decreaseQuantity(id),
         onRemove: (id) => this.removeItem(id),
         onClear: () => this.clearCart(),
+        onToggleLoyalty: () => this.toggleLoyalty(),
         onCheckout: () => this.proceedToCheckout()
       }
     );
