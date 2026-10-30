@@ -100,7 +100,7 @@ export const branchView = {
 
     const actionButton = isSelected
       ? `
-        <div class="w-full mt-3 py-1.5 px-3 rounded-full bg-[#B86A2C] text-white border-[2px] border-[#3A0E03] font-label-md text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-tactile-sm" aria-current="true">
+        <div class="btn-active-branch w-full mt-3 py-1.5 px-3 rounded-full bg-[#B86A2C] text-white border-[2px] border-[#3A0E03] font-label-md text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-tactile-sm" aria-current="true">
           <i data-lucide="check-circle-2" class="w-4 h-4 text-[#ffdea8]"></i>
           <span>Filial Ativa</span>
         </div>
