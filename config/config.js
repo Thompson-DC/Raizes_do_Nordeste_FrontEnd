@@ -15,7 +15,8 @@ export const CONFIG = {
     carrinho_atual: "rn_carrinho_atual",
     cliente_sessao: "rn_cliente_sessao",
     historico_pedidos: "rn_historico_pedidos",
-    schema_version: "rn_schema_version"
+    schema_version: "rn_schema_version",
+    pedido_ativo: "rn_pedido_ativo"
   },
   
   // Parâmetros do Programa de Fidelidade

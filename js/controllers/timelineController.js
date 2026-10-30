@@ -63,12 +63,15 @@ export class TimelineController {
     this.isAutoPlaying = this.currentStep < 3;
     this.isVisible = true;
 
+    // Retém o pedido ativo na sessão local para persistência no F5 (inclusive se Pronto para Retirada)
+    storageService.saveActiveOrder(this.activeOrder);
+
     // Ajusta a visibilidade dos containers principais (oculta catálogo e exibe timeline)
     this._toggleMainVisibility(true);
 
     this.render();
 
-    // Inicia a contagem regressiva automática de 4 segundos se não estiver pronto
+    // Inicia a contagem regressiva automática de 4 segundos apenas se não estiver pronto
     if (this.currentStep < 3) {
       this._startAutoTimer();
     }
@@ -156,6 +159,9 @@ export class TimelineController {
     this.currentStep = 1;
     this.isVisible = false;
 
+    // Limpa a referência de pedido ativo na sessão local
+    storageService.clearActiveOrder();
+
     // Reseta a sacola de compras com segurança através do storage
     storageService.resetCart();
 
@@ -171,7 +177,7 @@ export class TimelineController {
     // Rola a página para o topo suavemente
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    console.info(`[TimelineController] Novo pedido iniciado. Sacola resetada e catálogo reexibido.`);
+    console.info(`[TimelineController] Novo pedido iniciado. Pedido ativo limpo, sacola resetada e catálogo reexibido.`);
   }
 
   /**
@@ -298,7 +304,7 @@ export class TimelineController {
   }
 
   /**
-   * Atualiza o status do pedido dentro do histórico persistido no LocalStorage
+   * Atualiza o status do pedido dentro do histórico persistido e na sessão local
    * @private
    * @param {string} newStatus 
    */
@@ -308,6 +314,7 @@ export class TimelineController {
     this.activeOrder.status_preparo = newStatus;
 
     try {
+      // 1. Atualiza no array de histórico
       const orders = storageService.getOrders();
       const updatedOrders = orders.map(ord => {
         if (ord.id === this.activeOrder.id || ord.numero_sequencial === this.activeOrder.numero_sequencial) {
@@ -316,6 +323,9 @@ export class TimelineController {
         return ord;
       });
       storageService.setItem(CONFIG.storage_keys.historico_pedidos, updatedOrders);
+
+      // 2. Atualiza na referência de pedido ativo na sessão local
+      storageService.saveActiveOrder(this.activeOrder);
     } catch (err) {
       console.warn('[TimelineController] Erro ao sincronizar status do pedido no histórico:', err);
     }
@@ -323,27 +333,32 @@ export class TimelineController {
 
   /**
    * Restaura o pedido ativo caso a página seja recarregada (F5) conforme FSD 18.2
+   * Garante a retenção inclusive quando o status for "Pronto para Retirada"
    * @private
    */
   _restoreActiveOrderFromStorage() {
     try {
+      // 1. Prioridade: recupera da chave de pedido ativo na sessão local (rn_pedido_ativo)
+      const activeOrder = storageService.getActiveOrder();
+      if (activeOrder) {
+        console.info(`[TimelineController] Pedido ativo ${activeOrder.numero_sequencial} restaurado da sessão local (status: ${activeOrder.status_preparo}).`);
+        this.startTimeline(activeOrder);
+        return;
+      }
+
+      // 2. Contingência pelo histórico recente se ainda houver pedido em produção (< 2h)
       const orders = storageService.getOrders();
       if (Array.isArray(orders) && orders.length > 0) {
-        // Pega o pedido mais recente
         const latestOrder = orders[0];
-        
-        // Se o pedido mais recente foi criado há menos de 2 horas e não foi descartado, restaura
         const orderTime = new Date(latestOrder.data_hora).getTime();
         const now = new Date().getTime();
         const diffHours = (now - orderTime) / (1000 * 60 * 60);
 
         if (diffHours < 2) {
-          this.activeOrder = latestOrder;
-          this.currentStep = this._mapStatusToStep(latestOrder.status_preparo || 'Recebido');
-          
-          // Se ainda não estiver pronto, reabre na timeline
-          if (this.currentStep < 3) {
-            console.info(`[TimelineController] Pedido recente ${latestOrder.numero_sequencial} restaurado da sessão.`);
+          const step = this._mapStatusToStep(latestOrder.status_preparo || 'Recebido');
+          // Se ainda em produção (não finalizado e não pronto), restaura
+          if (step < 3) {
+            console.info(`[TimelineController] Pedido recente ${latestOrder.numero_sequencial} restaurado do histórico.`);
             this.startTimeline(latestOrder);
           }
         }

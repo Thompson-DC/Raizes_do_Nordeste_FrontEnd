@@ -181,6 +181,7 @@ export class CheckoutController {
 
     // 3. Persiste o pedido aprovado no LocalStorage através de storageService
     storageService.saveOrder(approvedOrder);
+    storageService.saveActiveOrder(approvedOrder);
 
     // 4. Emite evento institucional de aprovação do pedido
     window.dispatchEvent(new CustomEvent('rn:order-approved', {

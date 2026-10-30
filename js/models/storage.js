@@ -303,6 +303,31 @@ class StorageService {
     orders.unshift(order); // Insere no início para ordem decrescente
     return this.setItem(CONFIG.storage_keys.historico_pedidos, orders);
   }
+
+  /**
+   * Obtém o pedido ativo em produção ou finalizado na sessão local
+   * @returns {Object|null}
+   */
+  getActiveOrder() {
+    return this.getItem(CONFIG.storage_keys.pedido_ativo, null);
+  }
+
+  /**
+   * Grava o pedido ativo na sessão local
+   * @param {Object} order 
+   * @returns {boolean}
+   */
+  saveActiveOrder(order) {
+    return this.setItem(CONFIG.storage_keys.pedido_ativo, order);
+  }
+
+  /**
+   * Limpa a referência de pedido ativo na sessão local
+   * @returns {boolean}
+   */
+  clearActiveOrder() {
+    return this.removeItem(CONFIG.storage_keys.pedido_ativo);
+  }
 }
 
 // Exporta instância única (Singleton) da camada de persistência
