@@ -431,27 +431,151 @@ class CartController {
     this.toggleLoyalty(false);
   }
 
+  // ==========================================
+  // Métodos de Identificação e LGPD (Fase 8)
+  // Conforme especificado em docs/FSD.md (Seções 6.6, 6.7, 12.6, 14.4)
+  // ==========================================
+
+  /**
+   * Trata a digitação no campo de Nome
+   * @param {string} val 
+   */
+  handleNameInput(val) {
+    if (!this.client) {
+      this.client = storageService.getClient() || { ...MOCK_DATA.cliente_padrao };
+    }
+    this.client.nome = val;
+  }
+
+  /**
+   * Trata a digitação no campo de Telefone
+   * @param {string} val 
+   */
+  handlePhoneInput(val) {
+    if (!this.client) {
+      this.client = storageService.getClient() || { ...MOCK_DATA.cliente_padrao };
+    }
+    this.client.telefone = val;
+  }
+
+  /**
+   * Trata a alteração do checkbox de consentimento da LGPD
+   * @param {boolean} checked 
+   */
+  handleLGPDChange(checked) {
+    this.cart.consentimento_lgpd = Boolean(checked);
+    storageService.saveCart(this.cart);
+  }
+
+  /**
+   * Valida os campos de identificação do cliente e consentimento da LGPD
+   * Retorna true se válido ou exibe erros e retorna false
+   * @returns {boolean}
+   */
+  validateIdentificationForm() {
+    // 1. Obtém os valores mais recentes dos inputs ou da memória
+    const nameEl = document.getElementById('customer-name');
+    const phoneEl = document.getElementById('customer-phone');
+    const lgpdEl = document.getElementById('checkbox-lgpd-consent');
+
+    const currentName = nameEl ? nameEl.value : (this.client ? this.client.nome : '');
+    const currentPhone = phoneEl ? phoneEl.value : (this.client ? this.client.telefone : '');
+    const currentLGPD = lgpdEl ? lgpdEl.checked : Boolean(this.cart && this.cart.consentimento_lgpd);
+
+    const cleanName = String(currentName || '').trim();
+    const cleanPhoneDigits = String(currentPhone || '').replace(/\D/g, '');
+
+    let isValid = true;
+    let firstInvalidField = null;
+
+    // 2. Validação do Nome (mínimo de 3 caracteres)
+    if (cleanName.length < 3) {
+      isValid = false;
+      cartView.showFieldError('name', 'Informe seu nome completo (mínimo de 3 letras).');
+      if (!firstInvalidField) firstInvalidField = nameEl;
+    } else {
+      cartView.clearFieldError('name');
+    }
+
+    // 3. Validação do Telefone (DDD + 8 ou 9 dígitos = 10 ou 11 dígitos)
+    if (cleanPhoneDigits.length < 10 || cleanPhoneDigits.length > 11) {
+      isValid = false;
+      cartView.showFieldError('phone', 'Informe um telefone válido com DDD (Ex: (81) 98765-4321).');
+      if (!firstInvalidField) firstInvalidField = phoneEl;
+    } else {
+      cartView.clearFieldError('phone');
+    }
+
+    // 4. Validação do Consentimento LGPD (checkbox obrigatório)
+    if (!currentLGPD) {
+      isValid = false;
+      cartView.showFieldError('lgpd', 'É obrigatório aceitar os termos de privacidade para gerar o pedido.');
+      if (!firstInvalidField) firstInvalidField = lgpdEl;
+    } else {
+      cartView.clearFieldError('lgpd');
+    }
+
+    // 5. Se houver erro, focaliza o primeiro campo inválido e emite notificação
+    if (!isValid) {
+      if (firstInvalidField && typeof firstInvalidField.focus === 'function') {
+        firstInvalidField.focus();
+      }
+      cartView.showToast('Por favor, preencha os dados de identificação e aceite os termos da LGPD.', 'warning');
+      console.warn('[CartController] Validação de identificação/LGPD reprovada:', {
+        nomeValido: cleanName.length >= 3,
+        telefoneValido: cleanPhoneDigits.length >= 10 && cleanPhoneDigits.length <= 11,
+        lgpdAceito: currentLGPD
+      });
+      return false;
+    }
+
+    // 6. Atualiza e persiste o cliente e o consentimento no carrinho
+    this.client.nome = cleanName;
+    this.client.telefone = cartView.formatPhoneMask(cleanPhoneDigits);
+    storageService.saveClient(this.client);
+
+    this.cart.consentimento_lgpd = true;
+    storageService.saveCart(this.cart);
+
+    return true;
+  }
+
   /**
    * Ação de avançar para checkout / identificação
    */
   proceedToCheckout() {
     if (this.getItemCount() <= 0) {
-      console.warn('[CartController] Tentativa de avançar com sacola vazia.');
+      cartView.showToast('Sua sacola está vazia. Adicione itens antes de avançar.', 'warning');
       return;
     }
 
-    console.info('[CartController] Prosseguindo para a etapa de identificação e checkout...');
+    // Executa validação estrita da identificação e LGPD (Fase 8)
+    const isFormValid = this.validateIdentificationForm();
+    if (!isFormValid) {
+      return;
+    }
 
-    // Dispara evento para orquestração das fases subsequentes (Fase 8 e 9)
-    const event = new CustomEvent('rn:cart-checkout', {
+    console.info(`[CartController] Identificação validada com sucesso para "${this.client.nome}". Disparando checkout...`);
+
+    // Dispara evento de identificação concluída
+    window.dispatchEvent(new CustomEvent('rn:customer-identified', {
       detail: {
-        cart: this.cart
+        client: this.client,
+        consent_lgpd: true,
+        timestamp: new Date().toISOString()
       }
-    });
-    window.dispatchEvent(event);
+    }));
 
-    // Feedback visual amigável temporário enquanto as próximas fases não estão ativas
-    alert(`Pedido pronto com ${this.getItemCount()} itens (${cartView.formatCurrency(this.cart.total)}) na filial ${this.activeBranch ? this.activeBranch.nome : 'selecionada'}.\n\nPróxima etapa: Identificação e Pagamento.`);
+    // Dispara evento de checkout pronto para simulação do gateway (Fase 9)
+    window.dispatchEvent(new CustomEvent('rn:cart-checkout', {
+      detail: {
+        cart: this.cart,
+        client: this.client,
+        branch: this.activeBranch
+      }
+    }));
+
+    cartView.showToast(`Identificação de ${this.client.nome} confirmada! Pronto para selecionar o pagamento.`, 'success');
   }
 
   /**
@@ -503,6 +627,10 @@ class CartController {
         onRemove: (id) => this.removeItem(id),
         onClear: () => this.clearCart(),
         onToggleLoyalty: () => this.toggleLoyalty(),
+        onNameInput: (val) => this.handleNameInput(val),
+        onPhoneInput: (val) => this.handlePhoneInput(val),
+        onLGPDChange: (checked) => this.handleLGPDChange(checked),
+        onOpenTerms: () => window.dispatchEvent(new CustomEvent('rn:open-privacy-terms')),
         onCheckout: () => this.proceedToCheckout()
       }
     );

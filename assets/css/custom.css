@@ -170,6 +170,19 @@
   min-height: 48px;
 }
 
+/* Preserva as dimensões e proporções táteis de interruptores (switch), steppers, checkboxes e botões de ação compactos */
+.channel-totem [role="switch"],
+.channel-totem .btn-switch,
+.channel-totem input[type="checkbox"],
+.channel-totem input[type="radio"],
+.channel-totem [data-action="decrease-qty"],
+.channel-totem [data-action="increase-qty"],
+.channel-totem [data-action="remove-item"],
+.channel-totem #btn-clear-cart,
+.channel-totem .no-min-height {
+  min-height: unset !important;
+}
+
 /* ==========================================================================
    4. MODO WIREFRAME ESTRUTURAL (Auditoria Técnica & Acadêmica)
    ========================================================================== */

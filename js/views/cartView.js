@@ -36,6 +36,27 @@ export const cartView = {
   },
 
   /**
+   * Aplica máscara dinâmica de telefone celular / fixo brasileiro (XX) XXXXX-XXXX
+   * @param {string} value 
+   * @returns {string}
+   */
+  formatPhoneMask(value) {
+    if (!value) return '';
+    const digits = String(value).replace(/\D/g, '').slice(0, 11);
+    if (digits.length === 0) return '';
+    if (digits.length <= 2) {
+      return `(${digits}`;
+    }
+    if (digits.length <= 6) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    }
+    if (digits.length <= 10) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    }
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+  },
+
+  /**
    * Renderiza a sacola de compras completa dentro do container alvo
    * @param {HTMLElement} container 
    * @param {Object} cart Dados atuais do carrinho
@@ -109,6 +130,9 @@ export const cartView = {
         <!-- Resumo Financeiro & Totais -->
         ${items.length > 0 ? this._renderFinancialSummary(subtotal, discount, total, totalItems, cart.pontos_usados) : ''}
 
+        <!-- Formulário de Identificação do Cliente e Conformidade LGPD (Fase 8) -->
+        ${items.length > 0 ? this._renderIdentificationForm(actualClient, cart) : ''}
+
         <!-- Botão de Ação / Checkout -->
         <div class="pt-2">
           <button 
@@ -116,9 +140,9 @@ export const cartView = {
             id="btn-checkout-proceed" 
             class="w-full py-3.5 px-4 rounded-full font-headline-sm font-black text-sm sm:text-base border-[2.5px] border-[#4A1304] flex items-center justify-center gap-2 transition-all shadow-tactile-md ${items.length > 0 ? 'bg-primary-container text-[#4A1304] hover:bg-[#EEB382] pressable cursor-pointer' : 'bg-surface-container-high text-[#4A1304]/40 border-[#4A1304]/40 cursor-not-allowed'}"
             ${items.length === 0 ? 'disabled aria-disabled="true"' : ''}
-            title="${items.length > 0 ? 'Prosseguir para identificação e pagamento' : 'Adicione pratos na sacola para prosseguir'}"
+            title="${items.length > 0 ? 'Avançar para pagamento com identificação e LGPD' : 'Adicione pratos na sacola para prosseguir'}"
           >
-            <span>Finalizar Pedido</span>
+            <span>Avançar para Pagamento</span>
             <i data-lucide="arrow-right" class="w-4 h-4"></i>
           </button>
         </div>
@@ -280,11 +304,11 @@ export const cartView = {
         </div>
 
         <!-- Área de Ação e Switch Toggle Neo-Brutalista -->
-        <div class="pt-2 border-t border-[#4A1304]/15 flex items-center justify-between gap-3">
+        <div class="pt-2 border-t border-[#4A1304]/15 flex items-center justify-between gap-3 min-h-[48px]">
           <label 
             id="label-toggle-loyalty" 
             for="toggle-loyalty-points" 
-            class="flex-1 cursor-pointer select-none text-xs font-bold text-[#4A1304] leading-snug flex flex-col"
+            class="flex-1 cursor-pointer select-none text-xs font-bold text-[#4A1304] leading-snug flex flex-col py-1"
           >
             <span>
               Usar <strong>${availablePoints} pontos</strong> para obter <strong>${this.formatCurrency(maxDiscountValue)}</strong> de desconto
@@ -302,7 +326,7 @@ export const cartView = {
             data-action="toggle-loyalty"
             aria-checked="${isApplied ? 'true' : 'false'}"
             aria-labelledby="label-toggle-loyalty"
-            class="w-12 h-7 rounded-full border-[2px] border-[#4A1304] p-0.5 transition-colors relative flex items-center shrink-0 shadow-tactile-xs pressable cursor-pointer ${isApplied ? 'bg-[#25D366]' : 'bg-[#E6D8C5]'}"
+            class="btn-switch w-12 h-7 rounded-full border-[2px] border-[#4A1304] p-0.5 transition-colors relative flex items-center shrink-0 shadow-tactile-xs pressable cursor-pointer ${isApplied ? 'bg-[#25D366]' : 'bg-[#E6D8C5]'}"
             title="${isApplied ? 'Remover desconto de fidelidade' : 'Aplicar desconto de fidelidade'}"
           >
             <span 
@@ -367,6 +391,255 @@ export const cartView = {
         </div>
       </div>
     `;
+  },
+
+  /**
+   * Renderiza a seção de Identificação do Cliente e Consentimento LGPD
+   * Conforme especificado em docs/FSD.md (Seções 6.6, 6.7, 12.6, 14.4) e docs/DESIGN.md
+   * @private
+   * @param {Object|null} client 
+   * @param {Object} cart 
+   * @returns {string}
+   */
+  _renderIdentificationForm(client, cart) {
+    const rawName = (client && client.nome) ? client.nome : '';
+    const rawPhone = (client && client.telefone) ? client.telefone : '';
+    const formattedPhone = this.formatPhoneMask(rawPhone);
+    const isConsentChecked = Boolean(cart && cart.consentimento_lgpd);
+    const lgpdConsentText = (CONFIG.lgpd && CONFIG.lgpd.texto_consentimento) 
+      ? CONFIG.lgpd.texto_consentimento 
+      : 'Li e concordo com os Termos de Privacidade e autorizo o tratamento dos meus dados para emissão do pedido e acúmulo de pontos de fidelidade.';
+
+    return `
+      <section 
+        id="identification-section" 
+        class="bg-surface-container border-[2px] border-[#4A1304] rounded-2xl p-3.5 sm:p-4 shadow-tactile-sm flex flex-col gap-3 transition-all"
+        aria-label="Identificação do Cliente e Consentimento LGPD"
+      >
+        <!-- Cabeçalho da Identificação -->
+        <div class="flex items-center gap-2 pb-2 border-b border-[#4A1304]/15">
+          <div class="w-8 h-8 rounded-full bg-primary-container border-[2px] border-[#4A1304] flex items-center justify-center text-[#4A1304] shadow-tactile-xs shrink-0">
+            <i data-lucide="user-check" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-headline-sm text-xs sm:text-sm font-black text-[#4A1304] leading-tight">
+              Identificação do Pedido
+            </h3>
+            <p class="text-[11px] font-bold text-on-surface-variant">
+              Informe quem vai retirar o pedido no balcão
+            </p>
+          </div>
+        </div>
+
+        <!-- Formulário de Contato -->
+        <div class="flex flex-col gap-3">
+          <!-- Campo Nome Completo -->
+          <div class="flex flex-col gap-1">
+            <label for="customer-name" class="text-xs font-bold text-[#4A1304] flex items-center justify-between">
+              <span class="flex items-center gap-1">
+                <span>Nome Completo</span>
+                <span class="text-error font-black" title="Campo obrigatório">*</span>
+              </span>
+              <span class="text-[10px] text-on-surface-variant/75 font-normal">Mínimo 3 letras</span>
+            </label>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="customer-name" 
+                name="customer-name" 
+                value="${this.escapeHtml(rawName)}" 
+                placeholder="Ex: Severino da Silva" 
+                class="w-full bg-white border-[2px] border-[#4A1304] rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-[#4A1304] placeholder:text-[#5A1A05]/45 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-[#4A1304] transition-all"
+                autocomplete="name"
+                required
+                aria-required="true"
+                aria-describedby="error-customer-name"
+              >
+            </div>
+            <div id="error-customer-name" class="hidden text-error text-[11px] font-bold items-center gap-1 mt-0.5" role="alert">
+              <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="error-msg-text">Informe seu nome completo (mínimo de 3 letras).</span>
+            </div>
+          </div>
+
+          <!-- Campo Telefone Celular / WhatsApp -->
+          <div class="flex flex-col gap-1">
+            <label for="customer-phone" class="text-xs font-bold text-[#4A1304] flex items-center justify-between">
+              <span class="flex items-center gap-1">
+                <span>Telefone Celular / WhatsApp</span>
+                <span class="text-error font-black" title="Campo obrigatório">*</span>
+              </span>
+              <span class="text-[10px] text-on-surface-variant/75 font-normal">Com DDD</span>
+            </label>
+            <div class="relative">
+              <input 
+                type="tel" 
+                id="customer-phone" 
+                name="customer-phone" 
+                value="${this.escapeHtml(formattedPhone)}" 
+                placeholder="(81) 98765-4321" 
+                maxlength="15" 
+                class="w-full bg-white border-[2px] border-[#4A1304] rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-[#4A1304] placeholder:text-[#5A1A05]/45 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-[#4A1304] transition-all"
+                autocomplete="tel"
+                required
+                aria-required="true"
+                aria-describedby="error-customer-phone"
+              >
+            </div>
+            <div id="error-customer-phone" class="hidden text-error text-[11px] font-bold items-center gap-1 mt-0.5" role="alert">
+              <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="error-msg-text">Informe um telefone válido com DDD (Ex: (81) 98765-4321).</span>
+            </div>
+          </div>
+
+          <!-- Checkbox Obrigatório de Consentimento LGPD -->
+          <div id="container-lgpd-checkbox" class="bg-surface-container-lowest border-[2px] border-[#4A1304]/30 rounded-xl p-2.5 sm:p-3 transition-colors flex flex-col gap-1.5">
+            <div class="flex items-start gap-2.5">
+              <div class="flex items-center h-5 mt-0.5">
+                <input 
+                  type="checkbox" 
+                  id="checkbox-lgpd-consent" 
+                  name="checkbox-lgpd-consent" 
+                  class="w-4 h-4 text-primary bg-white border-[2px] border-[#4A1304] rounded cursor-pointer focus:ring-2 focus:ring-primary"
+                  ${isConsentChecked ? 'checked' : ''}
+                  aria-required="true"
+                  aria-describedby="error-lgpd-consent"
+                >
+              </div>
+              <label for="checkbox-lgpd-consent" class="text-[11px] sm:text-xs font-semibold text-[#4A1304] leading-snug cursor-pointer select-none">
+                ${this.escapeHtml(lgpdConsentText)}
+                <button 
+                  type="button" 
+                  id="btn-cart-terms-link" 
+                  class="text-secondary font-black underline hover:text-primary transition-colors ml-1 cursor-pointer focus:outline-none focus:ring-1 focus:ring-secondary rounded"
+                  title="Consultar Termos de Privacidade e Proteção de Dados"
+                >
+                  Ler termos completos
+                </button>
+              </label>
+            </div>
+            <div id="error-lgpd-consent" class="hidden text-error text-[11px] font-bold items-center gap-1 mt-0.5 pl-6" role="alert">
+              <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="error-msg-text">É obrigatório aceitar os termos de privacidade para gerar o pedido.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+  },
+
+  /**
+   * Exibe visualmente o erro de um campo específico com mensagem explicativa e borda vermelha
+   * @param {'name' | 'phone' | 'lgpd'} field 
+   * @param {string} [customMessage] 
+   */
+  showFieldError(field, customMessage = '') {
+    if (field === 'name') {
+      const input = document.getElementById('customer-name');
+      const errorDiv = document.getElementById('error-customer-name');
+      if (input) {
+        input.classList.add('border-error', 'bg-[#FFF5F5]', 'ring-1', 'ring-error');
+        input.setAttribute('aria-invalid', 'true');
+      }
+      if (errorDiv) {
+        if (customMessage) {
+          const txt = errorDiv.querySelector('.error-msg-text');
+          if (txt) txt.textContent = customMessage;
+        }
+        errorDiv.classList.remove('hidden');
+        errorDiv.classList.add('flex');
+      }
+    } else if (field === 'phone') {
+      const input = document.getElementById('customer-phone');
+      const errorDiv = document.getElementById('error-customer-phone');
+      if (input) {
+        input.classList.add('border-error', 'bg-[#FFF5F5]', 'ring-1', 'ring-error');
+        input.setAttribute('aria-invalid', 'true');
+      }
+      if (errorDiv) {
+        if (customMessage) {
+          const txt = errorDiv.querySelector('.error-msg-text');
+          if (txt) txt.textContent = customMessage;
+        }
+        errorDiv.classList.remove('hidden');
+        errorDiv.classList.add('flex');
+      }
+    } else if (field === 'lgpd') {
+      const box = document.getElementById('container-lgpd-checkbox');
+      const checkbox = document.getElementById('checkbox-lgpd-consent');
+      const errorDiv = document.getElementById('error-lgpd-consent');
+      if (box) {
+        box.classList.add('border-error', 'bg-[#FFF5F5]');
+      }
+      if (checkbox) {
+        checkbox.setAttribute('aria-invalid', 'true');
+      }
+      if (errorDiv) {
+        if (customMessage) {
+          const txt = errorDiv.querySelector('.error-msg-text');
+          if (txt) txt.textContent = customMessage;
+        }
+        errorDiv.classList.remove('hidden');
+        errorDiv.classList.add('flex');
+      }
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  },
+
+  /**
+   * Limpa o estado visual de erro de um campo
+   * @param {'name' | 'phone' | 'lgpd'} field 
+   */
+  clearFieldError(field) {
+    if (field === 'name') {
+      const input = document.getElementById('customer-name');
+      const errorDiv = document.getElementById('error-customer-name');
+      if (input) {
+        input.classList.remove('border-error', 'bg-[#FFF5F5]', 'ring-1', 'ring-error');
+        input.removeAttribute('aria-invalid');
+      }
+      if (errorDiv) {
+        errorDiv.classList.add('hidden');
+        errorDiv.classList.remove('flex');
+      }
+    } else if (field === 'phone') {
+      const input = document.getElementById('customer-phone');
+      const errorDiv = document.getElementById('error-customer-phone');
+      if (input) {
+        input.classList.remove('border-error', 'bg-[#FFF5F5]', 'ring-1', 'ring-error');
+        input.removeAttribute('aria-invalid');
+      }
+      if (errorDiv) {
+        errorDiv.classList.add('hidden');
+        errorDiv.classList.remove('flex');
+      }
+    } else if (field === 'lgpd') {
+      const box = document.getElementById('container-lgpd-checkbox');
+      const checkbox = document.getElementById('checkbox-lgpd-consent');
+      const errorDiv = document.getElementById('error-lgpd-consent');
+      if (box) {
+        box.classList.remove('border-error', 'bg-[#FFF5F5]');
+      }
+      if (checkbox) {
+        checkbox.removeAttribute('aria-invalid');
+      }
+      if (errorDiv) {
+        errorDiv.classList.add('hidden');
+        errorDiv.classList.remove('flex');
+      }
+    }
+  },
+
+  /**
+   * Limpa todos os erros visuais do formulário
+   */
+  clearAllErrors() {
+    this.clearFieldError('name');
+    this.clearFieldError('phone');
+    this.clearFieldError('lgpd');
   },
 
   /**
@@ -496,7 +769,80 @@ export const cartView = {
       });
     }
 
-    // 4. Finalizar Pedido
+    // 4. Inputs de Identificação e LGPD (Fase 8)
+    const nameInput = container.querySelector('#customer-name');
+    if (nameInput) {
+      nameInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if (typeof handlers.onNameInput === 'function') {
+          handlers.onNameInput(val);
+        }
+        if (val.trim().length >= 3) {
+          this.clearFieldError('name');
+        }
+      });
+      nameInput.addEventListener('blur', (e) => {
+        const val = e.target.value;
+        if (typeof handlers.onNameBlur === 'function') {
+          handlers.onNameBlur(val);
+        }
+        if (val.trim().length > 0 && val.trim().length < 3) {
+          this.showFieldError('name');
+        }
+      });
+    }
+
+    const phoneInput = container.querySelector('#customer-phone');
+    if (phoneInput) {
+      phoneInput.addEventListener('input', (e) => {
+        const raw = e.target.value;
+        const formatted = this.formatPhoneMask(raw);
+        e.target.value = formatted;
+        if (typeof handlers.onPhoneInput === 'function') {
+          handlers.onPhoneInput(formatted);
+        }
+        const cleanDigits = formatted.replace(/\D/g, '');
+        if (cleanDigits.length >= 10) {
+          this.clearFieldError('phone');
+        }
+      });
+      phoneInput.addEventListener('blur', (e) => {
+        const cleanDigits = e.target.value.replace(/\D/g, '');
+        if (typeof handlers.onPhoneBlur === 'function') {
+          handlers.onPhoneBlur(e.target.value);
+        }
+        if (cleanDigits.length > 0 && (cleanDigits.length < 10 || cleanDigits.length > 11)) {
+          this.showFieldError('phone');
+        }
+      });
+    }
+
+    const lgpdCheckbox = container.querySelector('#checkbox-lgpd-consent');
+    if (lgpdCheckbox) {
+      lgpdCheckbox.addEventListener('change', (e) => {
+        const checked = e.target.checked;
+        if (typeof handlers.onLGPDChange === 'function') {
+          handlers.onLGPDChange(checked);
+        }
+        if (checked) {
+          this.clearFieldError('lgpd');
+        }
+      });
+    }
+
+    const cartTermsLink = container.querySelector('#btn-cart-terms-link');
+    if (cartTermsLink) {
+      cartTermsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (typeof handlers.onOpenTerms === 'function') {
+          handlers.onOpenTerms();
+        } else {
+          window.dispatchEvent(new CustomEvent('rn:open-privacy-terms'));
+        }
+      });
+    }
+
+    // 5. Finalizar Pedido
     const checkoutBtn = container.querySelector('#btn-checkout-proceed');
     if (checkoutBtn && typeof handlers.onCheckout === 'function') {
       checkoutBtn.addEventListener('click', (e) => {

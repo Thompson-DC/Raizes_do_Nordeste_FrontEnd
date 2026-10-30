@@ -12,6 +12,7 @@ import { wireframeController } from './controllers/wireframeController.js';
 import { branchController } from './controllers/branchController.js';
 import { menuController } from './controllers/menuController.js';
 import { cartController } from './controllers/cartController.js';
+import { lgpdController } from './controllers/lgpdController.js';
 
 class App {
   constructor() {
@@ -23,6 +24,7 @@ class App {
     this.branchController = branchController;
     this.menuController = menuController;
     this.cartController = cartController;
+    this.lgpdController = lgpdController;
     this.initialized = false;
   }
 
@@ -53,13 +55,17 @@ class App {
     this.cartController.init();
     console.info(`[${this.config.app_nome}] Sacola de Compras e Resumo Financeiro inicializados.`);
 
-    // 6. Atualização e renderização dos ícones Lucide
+    // 6. Inicialização do controlador de conformidade LGPD e cookies (Fase 8)
+    this.lgpdController.init();
+    console.info(`[${this.config.app_nome}] Conformidade LGPD e Banner de Cookies inicializados.`);
+
+    // 7. Atualização e renderização dos ícones Lucide
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
 
     this.initialized = true;
-    console.info(`[${this.config.app_nome}] Fase 7 pronta: Programa de Fidelidade 'Nordeste Pontos' ativo e integrado à sacola.`);
+    console.info(`[${this.config.app_nome}] Fase 8 pronta: Identificação do Cliente e Conformidade LGPD ativas e integradas.`);
   }
 }
 
@@ -77,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.__RN_BRANCH__ = branchController;
   window.__RN_MENU__ = menuController;
   window.__RN_CART__ = cartController;
+  window.__RN_LGPD__ = lgpdController;
 });
 
 export default App;
