@@ -133,6 +133,12 @@
   display: flex !important;
 }
 
+/* Quando o catálogo ou sacola possuírem a classe hidden, display: none prevalece no canal Web */
+.channel-web #catalog-section.hidden,
+.channel-web #cart-aside.hidden {
+  display: none !important;
+}
+
 .channel-web .grid-branches {
   display: grid !important;
   width: 100% !important;
@@ -191,11 +197,91 @@ body.wireframe-mode {
   color: #111111 !important;
 }
 
+/* 4.1. Barra Global de Auditoria Monocromática */
 body.wireframe-mode #global-control-bar {
   background-color: #2b2b2b !important;
   border-color: #111111 !important;
 }
 
+body.wireframe-mode #global-control-bar,
+body.wireframe-mode #global-control-bar * {
+  color: #e5e5e5 !important;
+  border-color: #555555 !important;
+  text-shadow: none !important;
+}
+
+body.wireframe-mode #global-control-bar button.bg-primary {
+  background-color: #555555 !important;
+  color: #ffffff !important;
+}
+
+body.wireframe-mode #global-control-bar svg,
+body.wireframe-mode #global-control-bar [data-lucide] {
+  stroke: #e5e5e5 !important;
+}
+
+/* 4.2. Eliminação Estrita de Fontes, Textos e Decorações Coloridas */
+body.wireframe-mode #app-container,
+body.wireframe-mode #app-container * {
+  text-shadow: none !important;
+}
+
+body.wireframe-mode #app-container h1,
+body.wireframe-mode #app-container h2,
+body.wireframe-mode #app-container h3,
+body.wireframe-mode #app-container h4,
+body.wireframe-mode #app-container h5,
+body.wireframe-mode #app-container h6,
+body.wireframe-mode #app-container p,
+body.wireframe-mode #app-container span,
+body.wireframe-mode #app-container a,
+body.wireframe-mode #app-container label,
+body.wireframe-mode #app-container strong,
+body.wireframe-mode #app-container b,
+body.wireframe-mode #app-container em,
+body.wireframe-mode #app-container i,
+body.wireframe-mode #app-container button,
+body.wireframe-mode #app-container input,
+body.wireframe-mode #app-container select,
+body.wireframe-mode #app-container [class*="text-"],
+body.wireframe-mode #app-container [class*="text-[#"] {
+  color: #111111 !important;
+  text-decoration-color: #333333 !important;
+}
+
+/* Textos secundários e de apoio em tom cinza neutro */
+body.wireframe-mode #app-container .font-editorial-accent,
+body.wireframe-mode #app-container [class*="text-on-surface-variant"],
+body.wireframe-mode #app-container [class*="text-outline"],
+body.wireframe-mode #app-container [class*="text-secondary"],
+body.wireframe-mode #app-container [class*="opacity-"],
+body.wireframe-mode #app-container small {
+  color: #555555 !important;
+}
+
+/* Elementos escuros do wireframe mantêm texto claro legível */
+body.wireframe-mode #app-container button.bg-primary,
+body.wireframe-mode #app-container .bg-\[\#4A1304\],
+body.wireframe-mode #app-container .bg-\[\#211b0f\],
+body.wireframe-mode #app-container .bg-dark-wireframe {
+  background-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+body.wireframe-mode #app-container button.bg-primary *,
+body.wireframe-mode #app-container .bg-\[\#4A1304\] *,
+body.wireframe-mode #app-container .bg-\[\#211b0f\] * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* 4.3. Ícones SVG em Escala de Cinza Neutra */
+body.wireframe-mode #app-container svg,
+body.wireframe-mode #app-container [data-lucide] {
+  stroke: #222222 !important;
+}
+
+/* 4.4. Estrutura, Caixas e Contornos Tracejados */
 body.wireframe-mode #app-container {
   background-color: #ffffff !important;
   border-color: #222222 !important;
@@ -214,25 +300,46 @@ body.wireframe-mode input {
   box-shadow: none !important;
 }
 
+/* Fundos coloridos convertidos para escala de cinza estrutural */
 body.wireframe-mode [class*="bg-surface"],
-body.wireframe-mode [class*="bg-"] {
-  background-color: #f0f0f0 !important;
-  color: #111111 !important;
+body.wireframe-mode [class*="bg-primary"],
+body.wireframe-mode [class*="bg-secondary"],
+body.wireframe-mode [class*="bg-tertiary"],
+body.wireframe-mode [class*="bg-\[\#25D366"],
+body.wireframe-mode [class*="bg-\[\#E9A36A"],
+body.wireframe-mode [class*="bg-\[\#C9962E"],
+body.wireframe-mode [class*="bg-\[\#BA1A1A"],
+body.wireframe-mode [class*="bg-\[\#ffdea8"] {
+  background-color: #f2f2f2 !important;
+  background-image: none !important;
 }
 
-body.wireframe-mode #global-control-bar,
-body.wireframe-mode #global-control-bar * {
-  background-color: initial !important;
-}
-
+/* Bordas tracejadas estruturais */
 body.wireframe-mode .stitch,
 body.wireframe-mode [class*="border"] {
   border-style: dashed !important;
   border-color: #444444 !important;
 }
 
+/* Anéis de destaque e pulso convertidos para cinza neutro */
+body.wireframe-mode .ring-4,
+body.wireframe-mode [class*="ring-"] {
+  --tw-ring-color: #888888 !important;
+}
+
+/* Barra de progresso e nós da Linha do Tempo no Wireframe */
+body.wireframe-mode #timeline-progress-bar {
+  background: #444444 !important;
+  background-image: none !important;
+}
+
+body.wireframe-mode [id*="timeline-"] {
+  border-style: dashed !important;
+}
+
+/* Imagens com mascaramento monocromático */
 body.wireframe-mode img {
-  filter: grayscale(100%) contrast(140%) opacity(40%);
+  filter: grayscale(100%) contrast(140%) opacity(40%) !important;
   background-color: #d1d5db;
 }
 
@@ -289,15 +396,6 @@ html {
 .channel-app #timeline-card,
 .channel-totem #timeline-card {
   padding: 1rem !important;
-}
-
-/* No Modo Wireframe, desativa gradientes na barra de progresso */
-body.wireframe-mode #timeline-progress-bar {
-  background: #555555 !important;
-}
-
-body.wireframe-mode [id*="timeline-"] {
-  border-style: dashed !important;
 }
 
 
