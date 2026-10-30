@@ -40,10 +40,19 @@ export const cartView = {
    * @param {HTMLElement} container 
    * @param {Object} cart Dados atuais do carrinho
    * @param {Object} branchInfo Dados da filial ativa
-   * @param {Object} handlers Callbacks de interação
+   * @param {Object|null} [clientInfo=null] Dados do cliente ou handlers caso 4º parâmetro
+   * @param {Object} [handlers={}] Callbacks de interação
    */
-  renderCart(container, cart, branchInfo, handlers = {}) {
+  renderCart(container, cart, branchInfo, clientInfo = null, handlers = {}) {
     if (!container) return;
+
+    // Garante retrocompatibilidade se o 4º argumento for os handlers
+    let actualHandlers = handlers;
+    let actualClient = clientInfo;
+    if (clientInfo && typeof clientInfo === 'object' && ('onIncrease' in clientInfo || 'onCheckout' in clientInfo || 'onToggleLoyalty' in clientInfo)) {
+      actualHandlers = clientInfo;
+      actualClient = null;
+    }
 
     const items = Array.isArray(cart.itens) ? cart.itens : [];
     const totalItems = items.reduce((sum, item) => sum + (parseInt(item.quantidade, 10) || 0), 0);
@@ -94,8 +103,11 @@ export const cartView = {
           ${items.length === 0 ? this._renderEmptyState() : items.map(item => this._renderCartItem(item)).join('')}
         </div>
 
+        <!-- Painel do Programa de Fidelidade "Nordeste Pontos" (Fase 7) -->
+        ${items.length > 0 ? this._renderLoyaltyCard(cart, actualClient) : ''}
+
         <!-- Resumo Financeiro & Totais -->
-        ${items.length > 0 ? this._renderFinancialSummary(subtotal, discount, total, totalItems) : ''}
+        ${items.length > 0 ? this._renderFinancialSummary(subtotal, discount, total, totalItems, cart.pontos_usados) : ''}
 
         <!-- Botão de Ação / Checkout -->
         <div class="pt-2">
@@ -114,7 +126,7 @@ export const cartView = {
     `;
 
     container.innerHTML = html;
-    this._bindEvents(container, handlers);
+    this._bindEvents(container, actualHandlers);
   },
 
   /**
@@ -218,15 +230,105 @@ export const cartView = {
   },
 
   /**
+   * Renderiza o card do programa de fidelidade "Nordeste Pontos"
+   * Conforme especificado em docs/FSD.md (Seção 6.5 e 14.3) e docs/DESIGN.md
+   * @private
+   * @param {Object} cart
+   * @param {Object|null} [client]
+   * @returns {string}
+   */
+  _renderLoyaltyCard(cart, client) {
+    const defaultPoints = (CONFIG.fidelidade && CONFIG.fidelidade.saldo_padrao) || 150;
+    const availablePoints = (client && client.saldo_pontos !== undefined) ? Number(client.saldo_pontos) : defaultPoints;
+    const pointsPerReal = (CONFIG.fidelidade && CONFIG.fidelidade.pontos_por_real) || 10;
+    const maxDiscountValue = Number((availablePoints / pointsPerReal).toFixed(2));
+
+    const isApplied = Boolean(cart && (Number(cart.pontos_usados) > 0 || Number(cart.valor_desconto) > 0));
+
+    return `
+      <section 
+        id="loyalty-card" 
+        class="bg-surface-container border-[2px] border-[#4A1304] rounded-2xl p-3 sm:p-3.5 shadow-tactile-sm flex flex-col gap-2.5 transition-all relative overflow-hidden"
+        aria-label="Programa de Fidelidade Nordeste Pontos"
+      >
+        <!-- Cabeçalho do Card de Fidelidade -->
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-[#C9962E] border-[2px] border-[#4A1304] flex items-center justify-center text-[#4A1304] shadow-tactile-xs shrink-0">
+              <i data-lucide="award" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <h3 class="font-headline-sm text-xs sm:text-sm font-black text-[#4A1304] leading-tight">Nordeste Pontos</h3>
+                <span class="text-[10px] font-black uppercase px-1.5 py-0.5 rounded-full bg-[#C9962E]/25 text-[#7C5800] border border-[#7C5800]/30">
+                  Fidelidade
+                </span>
+              </div>
+              <p class="text-[11px] font-bold text-on-surface-variant flex items-center gap-1">
+                <span>Saldo disponível:</span>
+                <strong class="text-[#4A1304] font-black">${availablePoints} pontos</strong>
+                <span class="text-on-surface-variant/75 text-[10px]">(${this.formatCurrency(maxDiscountValue)})</span>
+              </p>
+            </div>
+          </div>
+          ${isApplied ? `
+            <span class="text-[10px] font-black bg-[#25D366]/20 text-[#1E8E3E] border border-[#25D366]/50 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-tactile-xs">
+              <i data-lucide="check" class="w-3 h-3"></i>
+              <span>Ativo</span>
+            </span>
+          ` : ''}
+        </div>
+
+        <!-- Área de Ação e Switch Toggle Neo-Brutalista -->
+        <div class="pt-2 border-t border-[#4A1304]/15 flex items-center justify-between gap-3">
+          <label 
+            id="label-toggle-loyalty" 
+            for="toggle-loyalty-points" 
+            class="flex-1 cursor-pointer select-none text-xs font-bold text-[#4A1304] leading-snug flex flex-col"
+          >
+            <span>
+              Usar <strong>${availablePoints} pontos</strong> para obter <strong>${this.formatCurrency(maxDiscountValue)}</strong> de desconto
+            </span>
+            <span class="text-[10px] text-on-surface-variant font-medium mt-0.5">
+              ${isApplied ? 'Desconto abatido no total da sacola' : 'Toque no interruptor para abater na sua compra'}
+            </span>
+          </label>
+
+          <!-- Switch Neo-Brutalista com acessibilidade WCAG (role="switch") -->
+          <button 
+            type="button" 
+            role="switch"
+            id="toggle-loyalty-points"
+            data-action="toggle-loyalty"
+            aria-checked="${isApplied ? 'true' : 'false'}"
+            aria-labelledby="label-toggle-loyalty"
+            class="w-12 h-7 rounded-full border-[2px] border-[#4A1304] p-0.5 transition-colors relative flex items-center shrink-0 shadow-tactile-xs pressable cursor-pointer ${isApplied ? 'bg-[#25D366]' : 'bg-[#E6D8C5]'}"
+            title="${isApplied ? 'Remover desconto de fidelidade' : 'Aplicar desconto de fidelidade'}"
+          >
+            <span 
+              class="w-5 h-5 rounded-full bg-white border-[1.5px] border-[#4A1304] shadow-sm transform transition-transform duration-200 ease-in-out flex items-center justify-center ${isApplied ? 'translate-x-5' : 'translate-x-0'}"
+            >
+              <i data-lucide="${isApplied ? 'check' : 'sparkles'}" class="w-3 h-3 ${isApplied ? 'text-[#25D366]' : 'text-on-surface-variant'}"></i>
+            </span>
+          </button>
+        </div>
+      </section>
+    `;
+  },
+
+  /**
    * Renderiza o quadro de resumo financeiro
    * @private
    * @param {number} subtotal 
    * @param {number} discount 
    * @param {number} total 
    * @param {number} totalItems 
+   * @param {number} [pointsUsed=0] 
    * @returns {string}
    */
-  _renderFinancialSummary(subtotal, discount, total, totalItems) {
+  _renderFinancialSummary(subtotal, discount, total, totalItems, pointsUsed = 0) {
+    const isDiscountActive = discount > 0;
+
     return `
       <div class="bg-surface-container-low border-[2px] border-[#4A1304] rounded-2xl p-3.5 flex flex-col gap-2">
         <div class="flex items-center justify-between text-xs font-bold text-on-surface-variant">
@@ -234,26 +336,31 @@ export const cartView = {
           <span class="font-black text-[#4A1304]">${this.formatCurrency(subtotal)}</span>
         </div>
 
-        ${discount > 0 ? `
-          <div class="flex items-center justify-between text-xs font-bold text-[#25D366]">
-            <span class="flex items-center gap-1">
-              <i data-lucide="award" class="w-3.5 h-3.5"></i>
-              <span>Nordeste Pontos</span>
+        ${isDiscountActive ? `
+          <div class="flex items-center justify-between text-xs font-bold text-[#1E8E3E] bg-[#25D366]/15 px-2.5 py-1.5 rounded-xl border border-[#25D366]/40">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="award" class="w-4 h-4 text-[#25D366]"></i>
+              <span class="text-[#4A1304]">Nordeste Pontos (${pointsUsed || 150} pts)</span>
             </span>
-            <span class="font-black">-${this.formatCurrency(discount)}</span>
+            <span class="font-black text-[#1E8E3E]">-${this.formatCurrency(discount)}</span>
           </div>
         ` : `
-          <div class="flex items-center justify-between text-[11px] font-bold text-on-surface-variant/80 italic">
-            <span class="flex items-center gap-1">
-              <i data-lucide="sparkles" class="w-3 h-3 text-secondary"></i>
+          <div class="flex items-center justify-between text-[11px] font-bold text-on-surface-variant/80 italic px-0.5">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#C9962E]"></i>
               <span>Nordeste Pontos</span>
             </span>
-            <span class="text-secondary font-semibold">Resgate no checkout</span>
+            <span class="text-secondary font-semibold">Resgate disponível</span>
           </div>
         `}
 
         <div class="border-t-[2px] border-dashed border-[#4A1304]/30 pt-2 flex items-center justify-between">
-          <span class="font-headline-sm text-sm font-black text-[#4A1304]">Total Geral</span>
+          <div>
+            <span class="font-headline-sm text-sm font-black text-[#4A1304] block leading-tight">Total Geral</span>
+            ${isDiscountActive && total === 0 ? `
+              <span class="text-[10px] font-extrabold text-[#1E8E3E] uppercase tracking-wider">100% coberto por pontos</span>
+            ` : ''}
+          </div>
           <span class="font-headline-sm text-base sm:text-lg font-black text-secondary">
             ${this.formatCurrency(total)}
           </span>
@@ -372,7 +479,24 @@ export const cartView = {
       }
     });
 
-    // 3. Finalizar Pedido
+    // 3. Resgate do Programa de Fidelidade (Fase 7)
+    const loyaltyToggle = container.querySelector('#toggle-loyalty-points');
+    if (loyaltyToggle && typeof handlers.onToggleLoyalty === 'function') {
+      loyaltyToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        handlers.onToggleLoyalty();
+      });
+    }
+
+    const loyaltyLabel = container.querySelector('#label-toggle-loyalty');
+    if (loyaltyLabel && typeof handlers.onToggleLoyalty === 'function') {
+      loyaltyLabel.addEventListener('click', (e) => {
+        e.preventDefault();
+        handlers.onToggleLoyalty();
+      });
+    }
+
+    // 4. Finalizar Pedido
     const checkoutBtn = container.querySelector('#btn-checkout-proceed');
     if (checkoutBtn && typeof handlers.onCheckout === 'function') {
       checkoutBtn.addEventListener('click', (e) => {
