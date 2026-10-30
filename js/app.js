@@ -14,6 +14,7 @@ import { menuController } from './controllers/menuController.js';
 import { cartController } from './controllers/cartController.js';
 import { lgpdController } from './controllers/lgpdController.js';
 import { checkoutController } from './controllers/checkoutController.js';
+import { timelineController } from './controllers/timelineController.js';
 
 class App {
   constructor() {
@@ -27,6 +28,7 @@ class App {
     this.cartController = cartController;
     this.lgpdController = lgpdController;
     this.checkoutController = checkoutController;
+    this.timelineController = timelineController;
     this.initialized = false;
   }
 
@@ -65,13 +67,17 @@ class App {
     this.checkoutController.init();
     console.info(`[${this.config.app_nome}] Gateway de Pagamento Mockado inicializado.`);
 
-    // 8. Atualização e renderização dos ícones Lucide
+    // 8. Inicialização do controlador da linha do tempo de produção (Fase 10)
+    this.timelineController.init();
+    console.info(`[${this.config.app_nome}] Linha do Tempo de Produção (Stepper) inicializada.`);
+
+    // 9. Atualização e renderização dos ícones Lucide
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
 
     this.initialized = true;
-    console.info(`[${this.config.app_nome}] Fase 9 pronta: Gateway de Pagamento Mockado ativo e integrado.`);
+    console.info(`[${this.config.app_nome}] Fase 10 pronta: Linha do Tempo de Produção ativa e integrada.`);
   }
 }
 
@@ -91,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.__RN_CART__ = cartController;
   window.__RN_LGPD__ = lgpdController;
   window.__RN_CHECKOUT__ = checkoutController;
+  window.__RN_TIMELINE__ = timelineController;
 });
 
 export default App;
