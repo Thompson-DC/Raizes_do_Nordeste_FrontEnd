@@ -280,6 +280,7 @@ export class TimelineController {
 
     if (showTimeline) {
       if (this.container) this.container.classList.remove('hidden');
+      if (catalogSection) catalogSection.classList.add('hidden');
       if (branchesContainer) branchesContainer.classList.add('hidden');
       if (categoriesContainer) categoriesContainer.classList.add('hidden');
       if (menuGridContainer) menuGridContainer.classList.add('hidden');
@@ -287,6 +288,7 @@ export class TimelineController {
       if (mobileCartBar) mobileCartBar.classList.add('hidden');
     } else {
       if (this.container) this.container.classList.add('hidden');
+      if (catalogSection) catalogSection.classList.remove('hidden');
       if (branchesContainer) branchesContainer.classList.remove('hidden');
       if (categoriesContainer) categoriesContainer.classList.remove('hidden');
       if (menuGridContainer) menuGridContainer.classList.remove('hidden');
