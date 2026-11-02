@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Raízes do Nordeste - Frente de Caixa Multicanal e Simulador de Autoatendimento para rede gastronômica sertaneja. Projeto Zero-Build com acessibilidade WCAG AA e conformidade LGPD.">
+  <meta name="theme-color" content="#4A1304">
   <title>Raízes do Nordeste - Frente de Caixa Multicanal</title>
   
   <!-- Favicon Oficial da Aplicação -->
@@ -107,6 +109,12 @@
 </head>
 <body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col transition-colors duration-200">
 
+  <!-- Link de Acessibilidade para Pular para o Conteúdo Principal (WCAG 2.4.1) -->
+  <a href="#main-content" id="skip-link" class="skip-link" aria-label="Pular para o conteúdo principal">
+    <i data-lucide="arrow-down-circle" class="w-4 h-4 text-[#4A1304]" aria-hidden="true"></i>
+    <span>Pular para o conteúdo principal</span>
+  </a>
+
   <!-- Barra de Controle Global Superior (Auditoria & Multicanalidade) -->
   <header id="global-control-bar" class="w-full bg-inverse-surface text-inverse-on-surface border-b-[2.5px] border-[#3A0E03] px-4 py-2 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
@@ -120,23 +128,23 @@
       <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
         <!-- Seletor de Viewport / Canais -->
         <nav aria-label="Seletor de Canal de Atendimento" class="flex items-center bg-[#211b0f] p-1 rounded-full border border-[#847469]/40 text-xs font-bold">
-          <button id="btn-channel-app" type="button" class="px-3 py-1 rounded-full text-inverse-on-surface hover:text-white transition-all flex items-center gap-1" data-channel="app" title="Simular App Mobile">
-            <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+          <button id="btn-channel-app" type="button" class="px-3 py-1 rounded-full text-inverse-on-surface hover:text-white transition-all flex items-center gap-1" data-channel="app" title="Simular App Mobile" aria-pressed="false" aria-label="Simular visualização em App Mobile">
+            <i data-lucide="smartphone" class="w-3.5 h-3.5" aria-hidden="true"></i>
             <span>App</span>
           </button>
-          <button id="btn-channel-totem" type="button" class="px-3 py-1 rounded-full text-inverse-on-surface hover:text-white transition-all flex items-center gap-1" data-channel="totem" title="Simular Totem de Autoatendimento">
-            <i data-lucide="tablet" class="w-3.5 h-3.5"></i>
+          <button id="btn-channel-totem" type="button" class="px-3 py-1 rounded-full text-inverse-on-surface hover:text-white transition-all flex items-center gap-1" data-channel="totem" title="Simular Totem de Autoatendimento" aria-pressed="false" aria-label="Simular visualização em Totem de Autoatendimento">
+            <i data-lucide="tablet" class="w-3.5 h-3.5" aria-hidden="true"></i>
             <span>Totem</span>
           </button>
-          <button id="btn-channel-web" type="button" class="px-3 py-1 rounded-full bg-primary text-white shadow-sm flex items-center gap-1" data-channel="web" title="Simular Web Desktop">
-            <i data-lucide="monitor" class="w-3.5 h-3.5"></i>
+          <button id="btn-channel-web" type="button" class="px-3 py-1 rounded-full bg-primary text-white shadow-sm flex items-center gap-1" data-channel="web" title="Simular Web Desktop" aria-pressed="true" aria-label="Simular visualização em Web Desktop">
+            <i data-lucide="monitor" class="w-3.5 h-3.5" aria-hidden="true"></i>
             <span>Web</span>
           </button>
         </nav>
 
         <!-- Alternador de Modo Wireframe -->
-        <button id="btn-toggle-wireframe" type="button" class="px-3 py-1.5 rounded-full border border-[#847469]/50 text-xs font-bold text-inverse-on-surface hover:bg-[#211b0f] transition-all flex items-center gap-1" title="Ativar/Desativar Modo Wireframe Estrutural">
-          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+        <button id="btn-toggle-wireframe" type="button" class="px-3 py-1.5 rounded-full border border-[#847469]/50 text-xs font-bold text-inverse-on-surface hover:bg-[#211b0f] transition-all flex items-center gap-1" title="Ativar/Desativar Modo Wireframe Estrutural" aria-pressed="false" aria-label="Alternar Modo Wireframe Estrutural para auditoria">
+          <i data-lucide="layers" class="w-3.5 h-3.5" aria-hidden="true"></i>
           <span>Modo Wireframe</span>
         </button>
       </div>
@@ -191,7 +199,7 @@
       </section>
 
       <!-- Área de Conteúdo Principal (Alocação Dinâmica pelas Views) -->
-      <main id="main-content" class="flex-1 flex flex-col lg:flex-row gap-6 p-4 lg:p-6 overflow-y-auto">
+      <main id="main-content" tabindex="-1" class="flex-1 flex flex-col lg:flex-row gap-6 p-4 lg:p-6 overflow-y-auto focus:outline-none">
         <!-- Container Dedicado para a Linha do Tempo de Produção (Fase 10) -->
         <div id="timeline-container" class="w-full hidden">
           <!-- Renderizado dinamicamente por timelineView.js -->
@@ -228,9 +236,10 @@
     </div>
   </div>
 
-  <!-- Contêineres de Modais e Notificações Flutuantes -->
-  <div id="modal-container" class="relative z-50"></div>
-  <div id="lgpd-banner-container" class="fixed bottom-0 left-0 right-0 z-40"></div>
+  <!-- Contêineres de Modais, Alertas e Notificações Flutuantes -->
+  <div id="modal-container" class="relative z-50" aria-live="polite"></div>
+  <div id="lgpd-banner-container" class="fixed bottom-0 left-0 right-0 z-40" aria-live="polite"></div>
+  <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none w-full max-w-sm sm:max-w-md px-4" aria-live="assertive"></div>
 
   <!-- Inicialização dos Ícones Lucide -->
   <script>

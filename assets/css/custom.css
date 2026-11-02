@@ -172,7 +172,10 @@
 .channel-totem select,
 .channel-totem a.btn,
 .channel-totem [role="button"],
-.channel-totem .touch-target {
+.channel-totem .touch-target,
+.channel-totem .btn-category-chip,
+.channel-totem .btn-add-dish,
+.channel-totem .btn-payment-method {
   min-height: 48px;
 }
 
@@ -347,10 +350,85 @@ body.wireframe-mode img {
 }
 
 /* ==========================================================================
-   5. AJUSTES DE SCROLL E ACESSIBILIDADE
+   5. AJUSTES DE SCROLL E ACESSIBILIDADE WCAG 2.1 AA
    ========================================================================== */
 html {
   scroll-behavior: smooth;
+}
+
+/* 5.1. Skip Link Acessível de Alto Contraste (WCAG 2.4.1 Bypass Blocks) */
+.skip-link {
+  position: fixed !important;
+  top: -120px !important;
+  left: 16px !important;
+  z-index: 99999 !important; /* Sempre acima de cabeçalhos sticky (z-50) e modais */
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 12px 22px !important;
+  background-color: #E9A36A !important; /* Laranja Brasa */
+  color: #4A1304 !important;
+  font-family: 'Nunito Sans', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  text-decoration: none !important;
+  border: 2.5px solid #4A1304 !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 0 #3A0E03 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-100%) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, top 0.25s ease !important;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 14px !important;
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  outline: 3px solid #885120 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 6px 0 #3A0E03, 0 0 0 2px #FFF1DD, 0 0 0 5px #4A1304 !important;
+}
+
+/* Skip link em Modo Wireframe Monocromático */
+body.wireframe-mode .skip-link {
+  background-color: #2b2b2b !important;
+  color: #ffffff !important;
+  border-color: #111111 !important;
+}
+
+body.wireframe-mode .skip-link:focus,
+body.wireframe-mode .skip-link:focus-visible {
+  outline: 3px solid #111111 !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 5px #111111 !important;
+}
+
+/* Indicadores de foco visíveis e de alto contraste para navegação por teclado (WCAG 2.4.7) */
+:focus-visible {
+  outline: 3px solid #885120 !important;
+  outline-offset: 2px !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[role="radio"]:focus-visible,
+[role="switch"]:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 3px solid #885120 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px #FFF1DD, 0 0 0 5px #4A1304 !important;
+}
+
+/* Foco de alto contraste estrutural no Modo Wireframe */
+body.wireframe-mode :focus-visible {
+  outline: 3px solid #111111 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 5px #111111 !important;
 }
 
 /* Ocultar barra de rolagem mantendo a funcionalidade de scroll */
