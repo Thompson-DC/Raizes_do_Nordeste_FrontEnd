@@ -440,16 +440,16 @@ export const cartView = {
                 <span>Nome Completo</span>
                 <span class="text-error font-black" title="Campo obrigatório">*</span>
               </span>
-              <span class="text-[10px] text-on-surface-variant/75 font-normal">Mínimo 3 letras</span>
+              <span class="text-[10px] text-on-surface-variant/75 font-normal">De 3 a 40 caracteres</span>
             </label>
             <div class="relative">
               <input 
                 type="text" 
                 id="customer-name" 
                 name="customer-name" 
-                value="${this.escapeHtml(rawName)}" 
+                value="${this.escapeHtml(rawName ? String(rawName).slice(0, 40) : '')}" 
                 placeholder="Ex: Severino da Silva" 
-                maxlength="80"
+                maxlength="40"
                 class="w-full bg-white border-[2px] border-[#4A1304] rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-[#4A1304] placeholder:text-[#5A1A05]/45 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-[#4A1304] transition-all"
                 autocomplete="name"
                 required
@@ -459,7 +459,7 @@ export const cartView = {
             </div>
             <div id="error-customer-name" class="hidden text-error text-[11px] font-bold items-center gap-1 mt-0.5" role="alert">
               <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
-              <span class="error-msg-text">Informe seu nome completo (mínimo de 3 letras).</span>
+              <span class="error-msg-text">Informe seu nome completo (de 3 a 40 letras).</span>
             </div>
           </div>
 
@@ -774,6 +774,9 @@ export const cartView = {
     const nameInput = container.querySelector('#customer-name');
     if (nameInput) {
       nameInput.addEventListener('input', (e) => {
+        if (e.target.value.length > 40) {
+          e.target.value = e.target.value.slice(0, 40);
+        }
         const val = e.target.value;
         if (typeof handlers.onNameInput === 'function') {
           handlers.onNameInput(val);
@@ -781,6 +784,16 @@ export const cartView = {
         if (val.trim().length >= 3) {
           this.clearFieldError('name');
         }
+      });
+      nameInput.addEventListener('paste', (e) => {
+        setTimeout(() => {
+          if (nameInput.value.length > 40) {
+            nameInput.value = nameInput.value.slice(0, 40);
+            if (typeof handlers.onNameInput === 'function') {
+              handlers.onNameInput(nameInput.value);
+            }
+          }
+        }, 0);
       });
       nameInput.addEventListener('blur', (e) => {
         const val = e.target.value;

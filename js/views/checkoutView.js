@@ -121,7 +121,8 @@ export class CheckoutView {
 
     const { cart, client, branch, currentMethod = 'pix' } = data;
     const branchName = branch ? branch.nome : 'Recife Antigo - Matriz';
-    const clientName = client && client.nome ? this.escapeHTML(client.nome) : 'Cliente';
+    const rawClientName = client && client.nome ? String(client.nome).slice(0, 40) : 'Cliente';
+    const clientName = this.escapeHTML(rawClientName);
     const clientPhone = client && client.telefone ? this.escapeHTML(client.telefone) : '';
     const totalItems = cart && Array.isArray(cart.itens) 
       ? cart.itens.reduce((sum, item) => sum + (parseInt(item.quantidade, 10) || 0), 0) 
@@ -160,9 +161,9 @@ export class CheckoutView {
             
             <!-- Resumo Financeiro Sintético do Pedido -->
             <div class="bg-surface-container border-[2px] border-[#4A1304] rounded-2xl p-3 sm:p-4 flex flex-col gap-2">
-              <div class="flex items-center justify-between text-xs text-on-surface-variant font-bold pb-2 border-b border-[#4A1304]/20">
-                <span>Cliente: <strong class="text-on-surface">${clientName}</strong> ${clientPhone ? `(${clientPhone})` : ''}</span>
-                <span class="bg-surface px-2 py-0.5 rounded-full border border-[#4A1304] text-[10px] font-black">${totalItems} ${totalItems === 1 ? 'item' : 'itens'}</span>
+              <div class="flex items-center justify-between text-xs text-on-surface-variant font-bold pb-2 border-b border-[#4A1304]/20 gap-2">
+                <span class="truncate min-w-0">Cliente: <strong class="text-on-surface">${clientName}</strong> ${clientPhone ? `(${clientPhone})` : ''}</span>
+                <span class="bg-surface px-2 py-0.5 rounded-full border border-[#4A1304] text-[10px] font-black shrink-0">${totalItems} ${totalItems === 1 ? 'item' : 'itens'}</span>
               </div>
 
               <div class="flex items-center justify-between text-xs pt-1">
@@ -466,7 +467,8 @@ export class CheckoutView {
     const formattedTotal = this.formatCurrency(order.total_pago || order.total || 0);
     const orderNumber = order.numero_sequencial || '#RN-1042';
     const branchName = order.filial ? (order.filial.nome || order.filial) : 'Recife Antigo';
-    const clientName = order.cliente ? order.cliente.nome : 'Cliente';
+    const rawClientName = order.cliente && order.cliente.nome ? String(order.cliente.nome).slice(0, 40) : 'Cliente';
+    const clientName = this.escapeHTML(rawClientName);
     const paymentMethod = order.forma_pagamento || 'PIX Instantâneo';
 
     card.className = 'relative w-full max-w-lg bg-[#25D366] text-[#113a1a] border-[3px] border-[#4A1304] rounded-3xl shadow-tactile-lg overflow-hidden flex flex-col my-auto transition-all duration-300';

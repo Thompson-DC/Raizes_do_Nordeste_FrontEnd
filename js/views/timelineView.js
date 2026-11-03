@@ -82,7 +82,8 @@ export class TimelineView {
 
     const safeSeqNumber = this.escapeHtml(order.numero_sequencial || '#RN-1042');
     const safeBranchName = this.escapeHtml(order.filial ? order.filial.nome : 'Recife Antigo - Matriz');
-    const safeClientName = this.escapeHtml(order.cliente ? order.cliente.nome : 'Cliente');
+    const rawClientName = order.cliente && order.cliente.nome ? String(order.cliente.nome).slice(0, 40) : 'Cliente';
+    const safeClientName = this.escapeHtml(rawClientName);
     const safeClientPhone = this.escapeHtml(order.cliente ? order.cliente.telefone : '');
     const safePaymentMethod = this.escapeHtml(order.forma_pagamento || 'PIX Instantâneo');
     const formattedTotal = this.formatCurrency(order.total_pago);
@@ -274,9 +275,9 @@ export class TimelineView {
 
           <div class="p-4 border-t-[1.5px] border-[#4A1304]/20 flex flex-col gap-2.5 text-xs text-on-surface">
             <!-- Dados do Cliente -->
-            <div class="flex justify-between items-center pb-2 border-b border-[#4A1304]/10">
-              <span class="text-on-surface-variant font-medium">Cliente:</span>
-              <span class="font-bold">${safeClientName} ${safeClientPhone ? `(${safeClientPhone})` : ''}</span>
+            <div class="flex justify-between items-center pb-2 border-b border-[#4A1304]/10 gap-2">
+              <span class="text-on-surface-variant font-medium shrink-0">Cliente:</span>
+              <span class="font-bold truncate text-right">${safeClientName} ${safeClientPhone ? `(${safeClientPhone})` : ''}</span>
             </div>
 
             <!-- Dados do Pagamento -->

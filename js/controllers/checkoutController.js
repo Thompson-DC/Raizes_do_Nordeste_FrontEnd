@@ -65,6 +65,9 @@ export class CheckoutController {
 
     this.activeCart = { ...cart };
     this.activeClient = client ? { ...client } : (storageService.getClient() || { nome: 'Cliente', telefone: '' });
+    if (this.activeClient && this.activeClient.nome) {
+      this.activeClient.nome = String(this.activeClient.nome).slice(0, 40);
+    }
     this.activeBranch = branch || { id: 'recife-antigo', nome: 'Recife Antigo - Matriz' };
     this.currentMethod = 'pix';
     this.status = 'idle';

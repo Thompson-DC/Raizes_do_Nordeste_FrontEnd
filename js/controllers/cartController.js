@@ -29,8 +29,12 @@ class CartController {
     this.container = document.getElementById(containerId);
     this.mobileBarContainer = document.getElementById(mobileBarId);
 
-    // Carrega ou inicializa dados do cliente fidelizado
+    // Carrega ou inicializa dados do cliente fidelizado com sanitização estrita de até 40 caracteres
     this.client = storageService.getClient() || { ...MOCK_DATA.cliente_padrao };
+    if (this.client && this.client.nome && this.client.nome.length > 40) {
+      this.client.nome = this.client.nome.slice(0, 40);
+      storageService.saveClient(this.client);
+    }
 
     // Carrega ou inicializa o carrinho a partir do storage
     this.cart = this._loadCart();
@@ -460,7 +464,7 @@ class CartController {
     if (!this.client) {
       this.client = storageService.getClient() || { ...MOCK_DATA.cliente_padrao };
     }
-    this.client.nome = val;
+    this.client.nome = String(val || '').slice(0, 40);
   }
 
   /**
@@ -498,16 +502,16 @@ class CartController {
     const currentPhone = phoneEl ? phoneEl.value : (this.client ? this.client.telefone : '');
     const currentLGPD = lgpdEl ? lgpdEl.checked : Boolean(this.cart && this.cart.consentimento_lgpd);
 
-    const cleanName = String(currentName || '').trim().slice(0, 80);
+    const cleanName = String(currentName || '').trim().slice(0, 40);
     const cleanPhoneDigits = String(currentPhone || '').replace(/\D/g, '').slice(0, 11);
 
     let isValid = true;
     let firstInvalidField = null;
 
-    // 2. Validação do Nome (mínimo de 3 caracteres)
+    // 2. Validação do Nome (mínimo de 3 caracteres e máximo de 40)
     if (cleanName.length < 3) {
       isValid = false;
-      cartView.showFieldError('name', 'Informe seu nome completo (mínimo de 3 letras).');
+      cartView.showFieldError('name', 'Informe seu nome completo (de 3 a 40 letras).');
       if (!firstInvalidField) firstInvalidField = nameEl;
     } else {
       cartView.clearFieldError('name');
