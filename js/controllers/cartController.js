@@ -502,8 +502,14 @@ class CartController {
     const currentPhone = phoneEl ? phoneEl.value : (this.client ? this.client.telefone : '');
     const currentLGPD = lgpdEl ? lgpdEl.checked : Boolean(this.cart && this.cart.consentimento_lgpd);
 
-    const cleanName = String(currentName || '').trim().slice(0, 40);
+    const rawInputName = String(currentName || '').trim();
+    const cleanName = rawInputName.slice(0, 40);
     const cleanPhoneDigits = String(currentPhone || '').replace(/\D/g, '').slice(0, 11);
+
+    // Sincroniza imediatamente o valor do input físico se tiver ultrapassado 40 caracteres
+    if (nameEl && nameEl.value.length > 40) {
+      nameEl.value = cleanName;
+    }
 
     let isValid = true;
     let firstInvalidField = null;
@@ -511,7 +517,11 @@ class CartController {
     // 2. Validação do Nome (mínimo de 3 caracteres e máximo de 40)
     if (cleanName.length < 3) {
       isValid = false;
-      cartView.showFieldError('name', 'Informe seu nome completo (de 3 a 40 letras).');
+      cartView.showFieldError('name', 'Informe seu nome completo (mínimo de 3 caracteres).');
+      if (!firstInvalidField) firstInvalidField = nameEl;
+    } else if (rawInputName.length > 40) {
+      isValid = false;
+      cartView.showFieldError('name', 'O nome não pode exceder 40 caracteres.');
       if (!firstInvalidField) firstInvalidField = nameEl;
     } else {
       cartView.clearFieldError('name');

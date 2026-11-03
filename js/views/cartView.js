@@ -440,7 +440,10 @@ export const cartView = {
                 <span>Nome Completo</span>
                 <span class="text-error font-black" title="Campo obrigatório">*</span>
               </span>
-              <span class="text-[10px] text-on-surface-variant/75 font-normal">De 3 a 40 caracteres</span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] text-on-surface-variant/75 font-normal">Máx 40 caracteres</span>
+                <span id="customer-name-counter" class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-surface-container border border-[#4A1304]/30 text-[#4A1304]">0/40</span>
+              </div>
             </label>
             <div class="relative">
               <input 
@@ -459,7 +462,7 @@ export const cartView = {
             </div>
             <div id="error-customer-name" class="hidden text-error text-[11px] font-bold items-center gap-1 mt-0.5" role="alert">
               <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
-              <span class="error-msg-text">Informe seu nome completo (de 3 a 40 letras).</span>
+              <span class="error-msg-text">Informe seu nome completo (de 3 a 40 caracteres).</span>
             </div>
           </div>
 
@@ -772,12 +775,73 @@ export const cartView = {
 
     // 4. Inputs de Identificação e LGPD (Fase 8)
     const nameInput = container.querySelector('#customer-name');
-    if (nameInput) {
-      nameInput.addEventListener('input', (e) => {
-        if (e.target.value.length > 40) {
-          e.target.value = e.target.value.slice(0, 40);
+    const nameCounter = container.querySelector('#customer-name-counter');
+
+    const updateNameCounter = () => {
+      if (!nameInput) return;
+      if (nameInput.value.length > 40) {
+        nameInput.value = nameInput.value.slice(0, 40);
+      }
+      const len = nameInput.value.length;
+      if (nameCounter) {
+        nameCounter.textContent = `${len}/40`;
+        if (len >= 40) {
+          nameCounter.classList.add('bg-[#E9A36A]', 'text-[#4A1304]');
+          nameCounter.classList.remove('bg-surface-container');
+        } else {
+          nameCounter.classList.remove('bg-[#E9A36A]');
+          nameCounter.classList.add('bg-surface-container');
         }
-        const val = e.target.value;
+      }
+    };
+
+    if (nameInput) {
+      updateNameCounter();
+
+      // Bloqueio rigoroso de digitação excedente
+      nameInput.addEventListener('keydown', (e) => {
+        const isControlKey = [
+          'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+          'Tab', 'Home', 'End', 'Enter', 'Escape'
+        ].includes(e.key) || e.ctrlKey || e.metaKey || e.altKey;
+
+        if (!isControlKey && nameInput.value.length >= 40 && nameInput.selectionStart === nameInput.selectionEnd) {
+          e.preventDefault();
+        }
+      });
+
+      // Interceptação e fatiamento imediato na colagem
+      nameInput.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const clipboardData = e.clipboardData || window.clipboardData;
+        const pastedText = clipboardData ? clipboardData.getData('text') : '';
+        const start = nameInput.selectionStart || 0;
+        const end = nameInput.selectionEnd || 0;
+        const currentVal = nameInput.value;
+        const remainingSpace = 40 - (currentVal.length - (end - start));
+
+        if (remainingSpace > 0) {
+          const insertText = pastedText.slice(0, remainingSpace);
+          nameInput.value = currentVal.slice(0, start) + insertText + currentVal.slice(end);
+          const newCursorPos = start + insertText.length;
+          nameInput.setSelectionRange(newCursorPos, newCursorPos);
+        }
+
+        updateNameCounter();
+        if (typeof handlers.onNameInput === 'function') {
+          handlers.onNameInput(nameInput.value);
+        }
+        if (nameInput.value.trim().length >= 3) {
+          this.clearFieldError('name');
+        }
+      });
+
+      nameInput.addEventListener('input', (e) => {
+        if (nameInput.value.length > 40) {
+          nameInput.value = nameInput.value.slice(0, 40);
+        }
+        updateNameCounter();
+        const val = nameInput.value;
         if (typeof handlers.onNameInput === 'function') {
           handlers.onNameInput(val);
         }
@@ -785,23 +849,17 @@ export const cartView = {
           this.clearFieldError('name');
         }
       });
-      nameInput.addEventListener('paste', (e) => {
-        setTimeout(() => {
-          if (nameInput.value.length > 40) {
-            nameInput.value = nameInput.value.slice(0, 40);
-            if (typeof handlers.onNameInput === 'function') {
-              handlers.onNameInput(nameInput.value);
-            }
-          }
-        }, 0);
-      });
+
       nameInput.addEventListener('blur', (e) => {
-        const val = e.target.value;
+        updateNameCounter();
+        const val = e.target.value.trim();
         if (typeof handlers.onNameBlur === 'function') {
           handlers.onNameBlur(val);
         }
-        if (val.trim().length > 0 && val.trim().length < 3) {
-          this.showFieldError('name');
+        if (val.length > 0 && val.length < 3) {
+          this.showFieldError('name', 'Informe seu nome completo (mínimo de 3 caracteres).');
+        } else if (val.length > 40) {
+          this.showFieldError('name', 'O nome deve ter no máximo 40 caracteres.');
         }
       });
     }

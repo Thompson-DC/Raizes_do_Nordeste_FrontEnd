@@ -149,8 +149,12 @@ class StorageService {
     this.setItem(schemaKey, CONFIG.versao);
 
     // Cliente da sessão local
-    if (!this.getItem(CONFIG.storage_keys.cliente_sessao)) {
+    const client = this.getItem(CONFIG.storage_keys.cliente_sessao);
+    if (!client) {
       this.setItem(CONFIG.storage_keys.cliente_sessao, { ...mockData.cliente_padrao });
+    } else if (client.nome && client.nome.length > 40) {
+      client.nome = String(client.nome).slice(0, 40);
+      this.setItem(CONFIG.storage_keys.cliente_sessao, client);
     }
 
     // Carrinho inicial vazio vinculado à filial padrão (Recife Antigo)
@@ -189,8 +193,12 @@ class StorageService {
         consentimento_lgpd: false
       });
     }
-    if (!this.getItem(CONFIG.storage_keys.cliente_sessao)) {
+    const client = this.getItem(CONFIG.storage_keys.cliente_sessao);
+    if (!client) {
       this.setItem(CONFIG.storage_keys.cliente_sessao, { ...mockData.cliente_padrao });
+    } else if (client.nome && client.nome.length > 40) {
+      client.nome = String(client.nome).slice(0, 40);
+      this.setItem(CONFIG.storage_keys.cliente_sessao, client);
     }
     if (!this.getItem(CONFIG.storage_keys.historico_pedidos)) {
       this.setItem(CONFIG.storage_keys.historico_pedidos, []);
