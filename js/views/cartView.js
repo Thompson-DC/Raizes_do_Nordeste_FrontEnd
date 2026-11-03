@@ -449,6 +449,7 @@ export const cartView = {
                 name="customer-name" 
                 value="${this.escapeHtml(rawName)}" 
                 placeholder="Ex: Severino da Silva" 
+                maxlength="80"
                 class="w-full bg-white border-[2px] border-[#4A1304] rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-[#4A1304] placeholder:text-[#5A1A05]/45 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-[#4A1304] transition-all"
                 autocomplete="name"
                 required

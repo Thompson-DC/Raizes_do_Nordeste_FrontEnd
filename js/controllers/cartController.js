@@ -138,11 +138,21 @@ class CartController {
       return cart;
     }
 
-    // Recalcula o subtotal de cada item
+    // Recalcula o subtotal de cada item com reconciliação defensiva contra o catálogo oficial
     let subtotal = 0;
     cart.itens.forEach(item => {
       const qty = Math.max(1, Math.min(99, parseInt(item.quantidade, 10) || 1));
-      const unit = Number(item.preco_unitario) || 0;
+      
+      // Reconciliação com a fonte de verdade para prevenir manipulação de preços via LocalStorage
+      const officialDish = (MOCK_DATA.cardapio && Array.isArray(MOCK_DATA.cardapio))
+        ? MOCK_DATA.cardapio.find(d => d.id === item.produto_id)
+        : null;
+      
+      const unit = officialDish ? Number(officialDish.preco) : (Math.max(0, Number(item.preco_unitario) || 0));
+      if (officialDish) {
+        item.nome = officialDish.nome;
+      }
+      item.preco_unitario = unit;
       item.quantidade = qty;
       item.subtotal = Number((qty * unit).toFixed(2));
       subtotal += item.subtotal;
@@ -356,12 +366,12 @@ class CartController {
    */
   getLoyaltyBalance() {
     if (this.client && this.client.saldo_pontos !== undefined) {
-      return Number(this.client.saldo_pontos);
+      return Math.max(0, parseInt(this.client.saldo_pontos, 10) || 0);
     }
     const storedClient = storageService.getClient();
     if (storedClient && storedClient.saldo_pontos !== undefined) {
       this.client = storedClient;
-      return Number(storedClient.saldo_pontos);
+      return Math.max(0, parseInt(storedClient.saldo_pontos, 10) || 0);
     }
     return (CONFIG.fidelidade && CONFIG.fidelidade.saldo_padrao) || 150;
   }
@@ -488,8 +498,8 @@ class CartController {
     const currentPhone = phoneEl ? phoneEl.value : (this.client ? this.client.telefone : '');
     const currentLGPD = lgpdEl ? lgpdEl.checked : Boolean(this.cart && this.cart.consentimento_lgpd);
 
-    const cleanName = String(currentName || '').trim();
-    const cleanPhoneDigits = String(currentPhone || '').replace(/\D/g, '');
+    const cleanName = String(currentName || '').trim().slice(0, 80);
+    const cleanPhoneDigits = String(currentPhone || '').replace(/\D/g, '').slice(0, 11);
 
     let isValid = true;
     let firstInvalidField = null;

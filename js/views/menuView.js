@@ -13,6 +13,21 @@
 
 export const menuView = {
   /**
+   * Sanitiza strings para prevenção de Cross-Site Scripting (XSS)
+   * @param {string} str 
+   * @returns {string}
+   */
+  escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  },
+
+  /**
    * Formata número para a moeda brasileira (BRL)
    * @param {number} value 
    * @returns {string} Ex: "R$ 24,90"
@@ -163,10 +178,10 @@ export const menuView = {
                   type="button"
                   role="tab"
                   aria-selected="${isActive ? 'true' : 'false'}"
-                  data-category-id="${cat.id}"
+                  data-category-id="${this.escapeHtml(cat.id)}"
                   class="btn-category-chip px-3.5 sm:px-4 py-2 rounded-full border-[2px] font-label-md text-xs sm:text-sm font-black transition-all flex items-center gap-1.5 cursor-pointer select-none active:translate-y-0.5 whitespace-nowrap flex-shrink-0 ${activeClass}"
                 >
-                  <span>${cat.nome}</span>
+                  <span>${this.escapeHtml(cat.nome)}</span>
                 </button>
               `;
             }).join('')}
@@ -267,19 +282,24 @@ export const menuView = {
     } else if (dish.badge_destaque) {
       badgeHtml = `
         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#C9962E] text-[#4A1304] border-[1.5px] border-[#3A0E03] rounded-full text-[10px] font-black tracking-wider shadow-tactile-xs">
-          <span>${dish.badge_destaque}</span>
+          <span>${this.escapeHtml(dish.badge_destaque)}</span>
         </span>
       `;
     }
+
+    const safeDishId = this.escapeHtml(dish.id);
+    const safeDishName = this.escapeHtml(dish.nome);
+    const safeDishDesc = this.escapeHtml(dish.descricao);
+    const safeDishImage = this.escapeHtml(dish.imagem);
 
     // Botão de Adição
     const btnHtml = isAvailable
       ? `
         <button
           type="button"
-          data-add-to-cart="${dish.id}"
+          data-add-to-cart="${safeDishId}"
           class="btn-add-dish inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-[#E9A36A] hover:bg-[#EEB382] text-[#4A1304] border-[2px] border-[#4A1304] rounded-full font-label-md text-xs sm:text-sm font-black shadow-tactile-sm active:translate-y-0.5 active:shadow-tactile-xs transition-all cursor-pointer min-h-[44px]"
-          aria-label="Adicionar ${dish.nome} por ${this.formatCurrency(dish.preco)}"
+          aria-label="Adicionar ${safeDishName} por ${this.formatCurrency(dish.preco)}"
         >
           <i data-lucide="plus" class="w-4 h-4 text-[#4A1304]"></i>
           <span>Adicionar</span>
@@ -290,7 +310,7 @@ export const menuView = {
           type="button"
           disabled
           class="inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-[#d7c3b6] text-[#52443a] border-[2px] border-[#847469] rounded-full font-label-md text-xs sm:text-sm font-black cursor-not-allowed opacity-75 min-h-[44px]"
-          aria-label="${dish.nome} indisponível nesta unidade"
+          aria-label="${safeDishName} indisponível nesta unidade"
           title="Prato esgotado no momento para esta filial"
         >
           <i data-lucide="slash" class="w-3.5 h-3.5"></i>
@@ -300,16 +320,16 @@ export const menuView = {
 
     return `
       <article
-        data-dish-card="${dish.id}"
+        data-dish-card="${safeDishId}"
         class="card-dish relative flex flex-col justify-between p-3.5 sm:p-4 rounded-3xl border-[2.5px] transition-all duration-200 overflow-hidden ${cardAvailabilityClass}"
       >
         <div>
           <!-- Moldura da Imagem com Proteção e Fallback SVG -->
           <div class="relative w-full h-44 sm:h-48 rounded-2xl border-[2px] border-[#4A1304] overflow-hidden bg-surface-container mb-3.5 flex items-center justify-center">
             <img
-              src="${dish.imagem}"
-              alt="${dish.nome}"
-              data-dish-img="${dish.id}"
+              src="${safeDishImage}"
+              alt="${safeDishName}"
+              data-dish-img="${safeDishId}"
               class="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-105"
               loading="lazy"
               onerror="this.onerror=null; this.src='${this.getSvgFallback(dish.categoria, dish.nome)}';"
@@ -322,10 +342,10 @@ export const menuView = {
 
           <!-- Título e Descrição do Prato -->
           <h3 class="font-headline-sm text-base sm:text-lg font-black text-[#4A1304] leading-snug tracking-tight mb-1">
-            ${dish.nome}
+            ${safeDishName}
           </h3>
           <p class="font-body-sm text-xs sm:text-sm text-on-surface-variant line-clamp-2 leading-relaxed mb-3">
-            ${dish.descricao}
+            ${safeDishDesc}
           </p>
         </div>
 
